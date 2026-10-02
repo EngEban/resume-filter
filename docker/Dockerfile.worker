@@ -1,0 +1,48 @@
+# ============================================================
+# ResumeFilter - Celery Worker Dockerfile
+# Same base as API but different CMD
+# ============================================================
+
+# ---------- Stage 1: Builder ----------
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# ---------- Stage 2: Production ----------
+FROM python:3.12-slim AS production
+
+WORKDIR /app
+
+# مكتبات أكثر للـ Worker (OCR، معالجة الصور)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    tesseract-ocr \
+    tesseract-ocr-ara \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN useradd --create-home --shell /bin/bash appuser
+COPY --chown=appuser:appuser . .
+USER appuser
+
+# الأمر الافتراضي: Celery Worker
+CMD ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=info"]

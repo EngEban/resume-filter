@@ -1,0 +1,21 @@
+# ============================================================
+# ResumeFilter - Redis Service
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-filter-redis
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: redis
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP

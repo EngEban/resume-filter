@@ -1,0 +1,178 @@
+# ============================================================
+# ResumeFilter - Docker Compose (Development / Local)
+# ============================================================
+# Run from the project root:
+#   docker-compose -f docker/docker-compose.yml up -d
+# ============================================================
+
+services:
+
+  # ============================================================
+  # PostgreSQL - Main Database
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: rf_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rf_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-rf_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-rls.sql:/docker-entrypoint-initdb.d/01-rls.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rf_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rf_network
+
+  # ============================================================
+  # Redis - Broker + Cache
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: rf_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rf_network
+
+  # ============================================================
+  # MinIO - Object Storage
+  # ============================================================
+  minio:
+    image: minio/minio:latest
+    container_name: rf_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rf_network
+
+  # ============================================================
+  # FastAPI + NiceGUI - Web Service
+  # ============================================================
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: rf_api
+    restart: unless-stopped
+    command: >
+      sh -c "
+      python scripts/wait_for_db.py &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ../app:/app/app
+      - ../ui:/app/ui
+      - ../alembic:/app/alembic
+      - ../scripts:/app/scripts
+    networks:
+      - rf_network
+
+  # ============================================================
+  # Celery Worker - Batch Processing
+  # ============================================================
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    container_name: rf_worker
+    restart: unless-stopped
+    command: >
+      sh -c "
+      python scripts/wait_for_db.py &&
+      celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+      "
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../app:/app/app
+      - ../ui:/app/ui
+      - ../scripts:/app/scripts
+    networks:
+      - rf_network
+
+  # ============================================================
+  # Flower - Celery Monitoring
+  # ============================================================
+  flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: rf_flower
+    restart: unless-stopped
+    command: >
+      celery -A app.workers.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+      - worker
+    networks:
+      - rf_network
+
+
+# ============================================================
+# Volumes
+# ============================================================
+volumes:
+  postgres_data:
+    name: rf_postgres_data
+  redis_data:
+    name: rf_redis_data
+  minio_data:
+    name: rf_minio_data
+
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  rf_network:
+    name: rf_network
+    driver: bridge

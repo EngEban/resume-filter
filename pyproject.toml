@@ -1,0 +1,106 @@
+# ============================================================
+# ResumeFilter - Project Configuration
+# ============================================================
+
+[project]
+name = "resume-filter"
+version = "0.1.0"
+description = "AI-powered resume screening and ATS scoring system"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+# ============================================================
+# Ruff - Linter & Formatter
+# ============================================================
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["app", "ui", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",     # line too long (handled by line-length)
+    "PLR0913",  # too many arguments
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG", "PLR2004"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "ui"]
+
+# ============================================================
+# Mypy - Static Type Checker
+# ============================================================
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "minio.*",
+    "pdfplumber.*",
+    "fitz.*",
+    "docx.*",
+    "easyocr.*",
+    "passlib.*",
+    "jose.*",
+    "slugify.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "nicegui.*"
+ignore_missing_imports = true
+
+# ============================================================
+# Pytest
+# ============================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests (need Docker)",
+    "slow: Slow tests",
+]
+
+# ============================================================
+# Coverage
+# ============================================================
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/alembic/*",
+    "*/scripts/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

@@ -1,0 +1,81 @@
+# ============================================================
+# ResumeFilter - Flower (Celery monitoring) Deployment
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resume-filter-flower
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: flower
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: resume-filter
+      app.kubernetes.io/component: flower
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: resume-filter
+        app.kubernetes.io/component: flower
+    spec:
+      containers:
+        - name: flower
+          image: ghcr.io/your-username/resume-filter-api:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - "celery"
+            - "-A"
+            - "app.workers.celery_app"
+            - "flower"
+            - "--port=5555"
+            - "--url_prefix=flower"
+          ports:
+            - name: http
+              containerPort: 5555
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: resume-filter-config
+            - secretRef:
+                name: resume-filter-secrets
+          readinessProbe:
+            httpGet:
+              path: /flower/healthcheck
+              port: 5555
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /flower/healthcheck
+              port: 5555
+            initialDelaySeconds: 45
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-filter-flower
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: flower
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: flower
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5555
+      protocol: TCP

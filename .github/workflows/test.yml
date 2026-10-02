@@ -1,0 +1,50 @@
+# ============================================================
+# Run the test suite on every push and pull request.
+# ============================================================
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        env:
+          SECRET_KEY: test-secret-key-for-ci-only-1234567890abcdef
+          MASTER_KEY: "dGVzdC1tYXN0ZXIta2V5LWZvci1jaS1vbmx5LTEyMzQ1Ng=="
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
+        run: |
+          pytest tests/ -v --cov=app --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false

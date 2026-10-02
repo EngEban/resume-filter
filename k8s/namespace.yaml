@@ -1,0 +1,10 @@
+# ============================================================
+# ResumeFilter - Namespace
+# ============================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: namespace

@@ -1,0 +1,21 @@
+# ============================================================
+# ResumeFilter - PostgreSQL Service (headless)
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-filter-postgres
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: postgres
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
