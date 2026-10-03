@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # tests/test_keyword_matcher.py
 # Unit tests for the keyword matcher.
 # ============================================================
@@ -50,9 +50,7 @@ class TestExtractKeywords:
         assert "de" in keywords
 
     def test_removes_new_stopwords(self):
-        keywords = extract_keywords(
-            "we need a python developer who will do the work"
-        )
+        keywords = extract_keywords("we need a python developer who will do the work")
         assert "need" not in keywords
         assert "will" not in keywords
         assert "do" not in keywords
@@ -89,9 +87,7 @@ class TestMatchKeywords:
         assert "python" in result.matched_keywords
         assert "fastapi" in result.matched_keywords
 
-    def test_weak_resume_has_high_missing(
-        self, sample_job_description, weak_resume_text
-    ):
+    def test_weak_resume_has_high_missing(self, sample_job_description, weak_resume_text):
         result = match_keywords(weak_resume_text, sample_job_description)
         assert result.match_ratio < 0.5
         assert "kubernetes" in result.missing_keywords
