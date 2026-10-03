@@ -102,7 +102,7 @@ def extract_text_from_pdf_images(
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         all_text: list[str] = []
 
-        for page_num, page in enumerate(doc):
+        for page in doc:
             pix = page.get_pixmap(dpi=200)
             img_bytes = pix.tobytes("png")
             page_text = extract_text_from_image(img_bytes, languages)
