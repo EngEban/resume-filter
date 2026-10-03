@@ -1,95 +1,76 @@
+﻿# ============================================================
+# app/services/keyword_matcher.py
+# Keyword extraction and matching (resume <-> job description).
 # ============================================================
-# tests/test_keyword_matcher.py
-# Unit tests for the keyword matcher.
-# ============================================================
+import re
+from dataclasses import dataclass
 
-from app.services.keyword_matcher import (
-    extract_keywords,
-    match_keywords,
-    normalize,
-    tokenize,
-)
-
-
-class TestNormalize:
-    def test_lowercases(self):
-        assert normalize("Hello WORLD") == "hello world"
-
-    def test_collapses_whitespace(self):
-        assert normalize("hello    world\n\nfoo") == "hello world foo"
-
-    def test_strips(self):
-        assert normalize("  spaced  ") == "spaced"
+STOPWORDS: set[str] = {
+    "a", "an", "the", "and", "or", "but", "if", "then", "else",
+    "is", "are", "was", "were", "be", "been", "being",
+    "to", "of", "in", "on", "at", "by", "for", "with", "about",
+    "from", "as", "into", "through", "during", "before", "after",
+    "above", "below", "up", "down", "out", "off", "over", "under",
+    "this", "that", "these", "those", "it", "its",
+    "i", "you", "he", "she", "we", "they", "them", "their",
+    "need", "needs", "needed", "want", "wants", "wanted",
+    "must", "should", "would", "could", "can", "will",
+    "have", "has", "had", "do", "does", "did",
+    "also", "well", "very", "just", "only", "such",
+    "في", "من", "إلى", "على", "عن", "مع", "هذا", "هذه", "ذلك",
+    "التي", "الذي", "كان", "كانت", "هو", "هي", "هم", "أن", "إن",
+    "لا", "ما", "لم", "لن", "قد", "كل", "بعض", "أي",
+}
 
 
-class TestTokenize:
-    def test_splits_on_punctuation(self):
-        tokens = tokenize("Python, FastAPI, and Docker.")
-        assert "python" in tokens
-        assert "fastapi" in tokens
-        assert "docker" in tokens
-
-    def test_supports_arabic(self):
-        tokens = tokenize("مهندس برمجيات في غزة")
-        assert "مهندس" in tokens
-        assert "غزة" in tokens
-
-    def test_returns_lowercase(self):
-        assert all(t == t.lower() for t in tokenize("HELLO World"))
+@dataclass
+class KeywordMatchResult:
+    job_keywords: list[str]
+    matched_keywords: list[str]
+    missing_keywords: list[str]
+    match_ratio: float
 
 
-class TestExtractKeywords:
-    def test_removes_stopwords(self):
-        keywords = extract_keywords("the quick brown fox and the dog")
-        assert "the" not in keywords
-        assert "and" not in keywords
-
-    def test_removes_short_tokens(self):
-        keywords = extract_keywords("a b c de fg")
-        # 'a' and 'b' are too short; 'de' and 'fg' are kept
-        assert "a" not in keywords
-        assert "b" not in keywords
-        assert "de" in keywords
-
-    def test_removes_new_stopwords(self):
-        keywords = extract_keywords("we need a python developer who will do the work")
-        assert "need" not in keywords
-        assert "will" not in keywords
-        assert "do" not in keywords
-        assert "python" in keywords
-        assert "developer" in keywords
+def normalize(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
-class TestMatchKeywords:
-    def test_perfect_match(self):
-        result = match_keywords(
-            "Python developer with FastAPI experience",
-            "Python FastAPI developer",
+def tokenize(text: str) -> list[str]:
+    return re.findall(r"\b[\w\u0600-\u06FF]+\b", text.lower())
+
+
+def extract_keywords(text: str, min_length: int = 2) -> set[str]:
+    tokens = tokenize(text)
+    return {
+        token
+        for token in tokens
+        if token not in STOPWORDS and len(token) >= min_length
+    }
+
+
+def match_keywords(
+    resume_text: str, job_description: str
+) -> KeywordMatchResult:
+    job_kws = extract_keywords(job_description)
+    resume_kws = extract_keywords(resume_text)
+
+    if not job_kws:
+        return KeywordMatchResult(
+            job_keywords=[],
+            matched_keywords=[],
+            missing_keywords=[],
+            match_ratio=0.0,
         )
-        assert result.match_ratio > 0.6
-        assert "python" in result.matched_keywords
-        assert "fastapi" in result.matched_keywords
 
-    def test_no_match(self):
-        result = match_keywords(
-            "Java Spring developer",
-            "Python FastAPI developer",
-        )
-        assert result.match_ratio < 0.3
-        assert "python" in result.missing_keywords
+    matched = sorted(job_kws & resume_kws)
+    missing = sorted(job_kws - resume_kws)
+    ratio = len(matched) / len(job_kws)
 
-    def test_empty_job_description(self):
-        result = match_keywords("Python developer", "")
-        assert result.match_ratio == 0.0
-        assert result.missing_keywords == []
-
-    def test_partial_match(self, sample_job_description, strong_resume_text):
-        result = match_keywords(strong_resume_text, sample_job_description)
-        assert result.match_ratio > 0.5
-        assert "python" in result.matched_keywords
-        assert "fastapi" in result.matched_keywords
-
-    def test_weak_resume_has_high_missing(self, sample_job_description, weak_resume_text):
-        result = match_keywords(weak_resume_text, sample_job_description)
-        assert result.match_ratio < 0.5
-        assert "kubernetes" in result.missing_keywords
+    return KeywordMatchResult(
+        job_keywords=sorted(job_kws),
+        matched_keywords=matched,
+        missing_keywords=missing,
+        match_ratio=ratio,
+    )
