@@ -1,0 +1,19 @@
+# ============================================================
+# ResumeFilter - Optional OCR Dependencies
+# ============================================================
+# These are ONLY needed for scanning image-based resumes.
+# They add ~2.5 GB (mostly PyTorch) to the image.
+#
+# Install with:
+#   pip install -r requirements-ocr.txt
+#
+# For most users, the base image (which handles digital PDFs
+# and DOCX files) is sufficient.
+# ============================================================
+
+-r requirements.txt
+
+# ---------- OCR ----------
+easyocr==1.7.1
+opencv-python-headless==4.10.0.84
+pillow==10.4.0
