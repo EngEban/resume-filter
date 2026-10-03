@@ -3,7 +3,7 @@
 # Celery tasks: split a batch into per-resume subtasks.
 # ============================================================
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from celery import chord, group
@@ -27,10 +27,7 @@ _sync_engine = create_engine(_sync_db_url(), pool_pre_ping=True)
 
 @celery_app.task(bind=True, name="tasks.process_batch", max_retries=3)
 def process_batch(self, batch_id: str) -> dict:
-    """
-    Coordinator task: split a batch into one subtask per resume
-    and attach a chord callback to finalize when all are done.
-    """
+    """Coordinator task: split a batch into one subtask per resume."""
     from app.db.models.batch import Batch
     from app.db.models.resume import Resume
 
@@ -40,17 +37,20 @@ def process_batch(self, batch_id: str) -> dict:
             if not batch:
                 raise ValueError(f"Batch {batch_id} not found")
 
-            resumes = session.execute(
-                select(Resume).where(Resume.batch_id == batch.id)
-            ).scalars().all()
+            resumes = (
+                session.execute(
+                    select(Resume).where(Resume.batch_id == batch.id)
+                )
+                .scalars()
+                .all()
+            )
 
             if not resumes:
                 batch.status = "completed"
-                batch.completed_at = datetime.now(timezone.utc)
+                batch.completed_at = datetime.now(UTC)
                 session.commit()
                 return {"batch_id": batch_id, "total_resumes": 0}
 
-            # Mark batch as processing
             session.execute(
                 update(Batch)
                 .where(Batch.id == batch.id)
@@ -58,7 +58,6 @@ def process_batch(self, batch_id: str) -> dict:
             )
             session.commit()
 
-            # Build the group of per-resume tasks
             job = group(
                 process_resume.s(
                     batch_id=str(batch.id),
@@ -69,7 +68,6 @@ def process_batch(self, batch_id: str) -> dict:
                 for r in resumes
             )
 
-            # Chord: run finalize_batch after all resumes finish
             chord(job)(finalize_batch.s(batch_id=str(batch.id)))
 
         logger.info("Dispatched %d resume tasks for batch %s", len(resumes), batch_id)
@@ -77,14 +75,12 @@ def process_batch(self, batch_id: str) -> dict:
 
     except Exception as exc:
         logger.exception("process_batch failed for %s", batch_id)
-        raise self.retry(exc=exc, countdown=30)
+        raise self.retry(exc=exc, countdown=30) from exc
 
 
 @celery_app.task(name="tasks.finalize_batch")
 def finalize_batch(results: list, batch_id: str) -> dict:
-    """
-    Chord callback: runs once every resume subtask has finished.
-    """
+    """Chord callback: runs once every resume subtask has finished."""
     from app.db.models.batch import Batch
     from app.db.models.resume import Resume
 
@@ -93,9 +89,13 @@ def finalize_batch(results: list, batch_id: str) -> dict:
         if not batch:
             return {"batch_id": batch_id, "status": "not_found"}
 
-        statuses = session.execute(
-            select(Resume.status).where(Resume.batch_id == batch.id)
-        ).scalars().all()
+        statuses = (
+            session.execute(
+                select(Resume.status).where(Resume.batch_id == batch.id)
+            )
+            .scalars()
+            .all()
+        )
 
         completed = sum(1 for s in statuses if s == "completed")
         failed = sum(1 for s in statuses if s == "failed")
@@ -103,7 +103,7 @@ def finalize_batch(results: list, batch_id: str) -> dict:
         batch.completed = completed
         batch.failed = failed
         batch.status = "completed" if failed < len(statuses) else "failed"
-        batch.completed_at = datetime.now(timezone.utc)
+        batch.completed_at = datetime.now(UTC)
         session.commit()
 
     logger.info("Batch %s finished: %d ok, %d failed", batch_id, completed, failed)

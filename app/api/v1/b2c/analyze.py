@@ -31,20 +31,11 @@ async def analyze_resume(
     user: Annotated[User, Depends(get_current_b2c_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> AnalysisResponse:
-    """
-    Analyze a single resume against a job description.
-
-    Returns ATS score, breakdown, missing keywords, and suggestions.
-    B2C users use the platform-wide LLM key.
-    """
-    # 1. Enforce daily limit
+    """Analyze a single resume against a job description."""
     await check_b2c_daily_limit(user.id, db, limit=settings.B2C_DAILY_LIMIT)
 
-    # 2. Parse resume text into structured data
     parsed = parse_resume_text(payload.resume_text)
 
-    # 3. Ask LLM for subjective metrics + suggestions
-    # B2C has no tenant, so the platform key is used automatically.
     provider = get_provider(tenant=None)
     try:
         llm_analysis, suggestions = await generate_suggestions(
@@ -55,9 +46,10 @@ async def analyze_resume(
         )
     except Exception as exc:
         logger.exception("LLM analysis failed: %s", exc)
-        raise HTTPException(status_code=502, detail="LLM provider error")
+        raise HTTPException(
+            status_code=502, detail="LLM provider error"
+        ) from exc
 
-    # 4. Calculate final ATS score
     score = calculate_ats_score(
         parsed_resume=parsed,
         raw_text=payload.resume_text,
@@ -65,7 +57,6 @@ async def analyze_resume(
         llm_analysis=llm_analysis,
     )
 
-    # 5. Persist the analysis
     analysis = Analysis(
         user_id=user.id,
         resume_text=payload.resume_text,

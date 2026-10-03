@@ -9,7 +9,7 @@ from ui.components.header import render_header
 from ui.components.level_chart import render_level_chart
 from ui.components.score_badge import render_score_badge
 from ui.state import SessionState
-from ui.theme import DANGER, PRIMARY, SUCCESS
+from ui.theme import DANGER, PRIMARY
 
 
 def render(resume_id: str) -> None:

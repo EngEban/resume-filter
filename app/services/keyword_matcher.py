@@ -2,7 +2,6 @@
 # tests/test_keyword_matcher.py
 # Unit tests for the keyword matcher.
 # ============================================================
-import pytest
 
 from app.services.keyword_matcher import (
     extract_keywords,

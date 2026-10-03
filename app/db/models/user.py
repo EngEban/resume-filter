@@ -12,8 +12,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from app.db.models.tenant import Tenant
     from app.db.models.analysis import Analysis
+    from app.db.models.tenant import Tenant
 
 
 class User(Base, UUIDMixin, TimestampMixin):

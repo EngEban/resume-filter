@@ -2,7 +2,8 @@
 # app/core/dependencies.py
 # Common FastAPI dependencies.
 # ============================================================
-from typing import Annotated, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -14,7 +15,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.db.models.user import User
 from app.db.session import get_db, get_session
-
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/login",
@@ -44,7 +44,7 @@ async def get_current_user(
             raise credentials_exc
         user_id = UUID(user_id_raw)
     except (JWTError, ValueError):
-        raise credentials_exc
+        raise credentials_exc from None
 
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
@@ -78,11 +78,7 @@ async def get_tenant_db(
     """
     Database session with Row-Level Security scoped to the
     authenticated user's tenant.
-
-    Uses SET LOCAL, so the tenant context lives only for the
-    duration of the session's transaction.
     """
-    # tenant_id is guaranteed non-null by get_current_b2b_user
     assert user.tenant_id is not None
     async with get_session(user.tenant_id) as session:
         yield session

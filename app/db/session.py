@@ -2,8 +2,8 @@
 # app/db/session.py
 # Async Database Session + RLS Context
 # ============================================================
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 from uuid import UUID
 
 from sqlalchemy import text
@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import settings
-
 
 # ---------- Engine ----------
 engine = create_async_engine(

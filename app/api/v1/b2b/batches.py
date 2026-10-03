@@ -4,7 +4,7 @@
 # ============================================================
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 
 from fastapi import (
@@ -48,7 +48,7 @@ async def create_batch(
     job_title: Annotated[str, Form()],
     job_description: Annotated[str, Form()],
     job_requirements: Annotated[str | None, Form()] = None,
-    files: Annotated[list[UploadFile], File()] = [],
+    files: Annotated[list[UploadFile] | None, File()] = None,
 ) -> BatchRead:
     """Upload a batch of resumes for a job description."""
     if not files:
@@ -99,7 +99,7 @@ async def create_batch(
 
 
 # ============================================================
-# List batches (with pagination + filters)
+# List batches
 # ============================================================
 @router.get("", response_model=list[BatchRead])
 async def list_batches(
@@ -124,7 +124,7 @@ async def list_batches(
 
 
 # ============================================================
-# Get batch status
+# Get batch
 # ============================================================
 @router.get("/{batch_id}", response_model=BatchRead)
 async def get_batch(
@@ -142,7 +142,7 @@ async def get_batch(
 
 
 # ============================================================
-# List resumes in a batch (with search + sort + filter)
+# List resumes in a batch
 # ============================================================
 @router.get("/{batch_id}/resumes", response_model=list[ResumeRead])
 async def list_batch_resumes(
@@ -237,7 +237,7 @@ async def export_batch_xlsx(
     ]
 
     xlsx_bytes = build_batch_workbook(batch_dict, resume_dicts)
-    filename = f"batch_{str(batch.id)[:8]}_{datetime.now(timezone.utc):%Y%m%d}.xlsx"
+    filename = f"batch_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
         media_type=(
@@ -292,7 +292,7 @@ async def export_batch_pdf(
     ]
 
     pdf_bytes = build_batch_pdf(batch_dict, resume_dicts)
-    filename = f"batch_{str(batch.id)[:8]}_{datetime.now(timezone.utc):%Y%m%d}.pdf"
+    filename = f"batch_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -309,11 +309,7 @@ async def reprocess_batch(
     user: Annotated[User, Depends(get_current_b2b_user)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
-    """
-    Reprocess only the failed resumes in a batch.
-
-    Resets failed resumes to 'pending' and re-dispatches them.
-    """
+    """Reprocess only the failed resumes in a batch."""
     batch = (
         await db.execute(select(Batch).where(Batch.id == batch_id))
     ).scalar_one_or_none()
@@ -346,8 +342,9 @@ async def reprocess_batch(
     await db.flush()
     await db.refresh(batch)
 
-    # Re-dispatch only the failed ones
     from celery import group
+
+    from app.workers.tasks.batch import finalize_batch
     from app.workers.tasks.resume import process_resume
 
     job = group(
@@ -359,8 +356,6 @@ async def reprocess_batch(
         )
         for r in failed_resumes
     )
-    from app.workers.tasks.batch import finalize_batch
-
     job.link(finalize_batch.s(batch_id=str(batch.id)))
     job.apply_async()
 

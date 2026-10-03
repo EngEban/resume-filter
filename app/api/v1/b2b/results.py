@@ -4,7 +4,7 @@
 # ============================================================
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -181,7 +181,7 @@ async def export_comparison_xlsx(
     ]
 
     xlsx_bytes = build_comparison_workbook(batch_dict, resume_dicts)
-    filename = f"compare_{str(batch.id)[:8]}_{datetime.now(timezone.utc):%Y%m%d}.xlsx"
+    filename = f"compare_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
         media_type=(

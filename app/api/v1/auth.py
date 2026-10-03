@@ -2,7 +2,7 @@
 # app/api/v1/auth.py
 # Authentication endpoints (register + login).
 # ============================================================
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -42,7 +42,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 # ------------------------------------------------------------
 def create_access_token(user: User, expires_minutes: int = 60 * 24) -> str:
     """Create a signed JWT for the given user."""
-    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
+    expire = datetime.now(UTC) + timedelta(minutes=expires_minutes)
     payload = {
         "sub": str(user.id),
         "tenant_id": str(user.tenant_id) if user.tenant_id else None,

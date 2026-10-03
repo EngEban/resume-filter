@@ -4,14 +4,14 @@ Revision ID: 0002_rls
 Revises: 0001_initial
 Create Date: 2026-10-02
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 from alembic import op
 
 revision: str = "0002_rls"
-down_revision: Union[str, None] = "0001_initial"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "0001_initial"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 TENANT_SCOPED_TABLES = ["users", "batches", "resumes"]
@@ -47,7 +47,7 @@ def upgrade() -> None:
 
     # -------- Bypass policy for admin role --------
     # Grants the DB owner bypass so migrations and admin tools work.
-    for table in TENANT_SCOPED_TABLES + ["analyses"]:
+    for table in [*TENANT_SCOPED_TABLES, "analyses"]:
         op.execute(
             f"""
             CREATE POLICY bypass_{table} ON {table}
@@ -59,7 +59,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    for table in TENANT_SCOPED_TABLES + ["analyses"]:
+    for table in [*TENANT_SCOPED_TABLES, "analyses"]:
         op.execute(f"DROP POLICY IF EXISTS bypass_{table} ON {table};")
         op.execute(f"DROP POLICY IF EXISTS tenant_isolation_{table} ON {table};")
         op.execute(f"DROP POLICY IF EXISTS user_isolation_{table} ON {table};")

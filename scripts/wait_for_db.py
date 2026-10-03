@@ -29,7 +29,7 @@ def main() -> int:
             conn.close()
             print(f"PostgreSQL is ready (attempt {attempt}).")
             return 0
-        except psycopg2.OperationalError as exc:
+        except psycopg2.OperationalError:
             print(f"Waiting for PostgreSQL... ({attempt}/{MAX_ATTEMPTS})")
             time.sleep(SLEEP_SECONDS)
 

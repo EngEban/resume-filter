@@ -49,9 +49,7 @@ async def _process_resume_async(
         batch = session.get(Batch, resume.batch_id)
         job_description = batch.job_description if batch else ""
         tenant = (
-            session.get(Tenant, resume.tenant_id)
-            if resume.tenant_id
-            else None
+            session.get(Tenant, resume.tenant_id) if resume.tenant_id else None
         )
 
     # --- Download file from MinIO ---
@@ -140,4 +138,6 @@ def process_resume(
             logger.exception("Failed to mark resume %s as failed", resume_id)
 
         # Retry with exponential backoff
-        raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1))
+        raise self.retry(
+            exc=exc, countdown=30 * (self.request.retries + 1)
+        ) from exc

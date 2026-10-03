@@ -2,12 +2,8 @@
 # tests/conftest.py
 # Shared pytest fixtures.
 # ============================================================
-from typing import Any
 
 import pytest
-
-from app.services.ats_engine import ATSScore, calculate_ats_score
-from app.services.keyword_matcher import KeywordMatchResult, match_keywords
 
 
 # ------------------------------------------------------------

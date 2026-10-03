@@ -2,12 +2,10 @@
 # ui/components/header.py
 # Top navigation bar shared across authenticated pages.
 # ============================================================
-from typing import Callable
 
 from nicegui import app, ui
 
 from ui.state import SessionState
-from ui.theme import PRIMARY
 
 
 def render_header(state: SessionState) -> None:

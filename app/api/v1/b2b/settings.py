@@ -7,7 +7,6 @@ import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -18,13 +17,13 @@ from app.db.models.user import User
 from app.providers import resolve_llm_config
 from app.providers.unified_provider import UnifiedLLMProvider
 from app.schemas.settings import (
+    SUGGESTED_MODELS,
+    SUPPORTED_PROVIDERS,
     ConnectionTestResult,
     LLMSettingsRead,
     LLMSettingsUpdate,
     ProviderInfo,
     ProvidersListResponse,
-    SUGGESTED_MODELS,
-    SUPPORTED_PROVIDERS,
 )
 
 logger = logging.getLogger(__name__)

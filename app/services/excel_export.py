@@ -3,7 +3,7 @@
 # Generate Excel workbooks from batch results.
 # ============================================================
 import io
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from openpyxl import Workbook
@@ -96,7 +96,7 @@ def build_batch_workbook(batch: dict, resumes: list[dict]) -> bytes:
         f"Total: {batch.get('total_resumes', 0)}  |  "
         f"Completed: {batch.get('completed', 0)}  |  "
         f"Failed: {batch.get('failed', 0)}  |  "
-        f"Exported: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
+        f"Exported: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}"
     )
     meta_cell.font = Font(size=10, color="64748B")
     ws.row_dimensions[2].height = 18

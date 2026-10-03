@@ -3,7 +3,7 @@
 # Generate PDF reports for batches and single resumes.
 # ============================================================
 import io
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from reportlab.lib import colors
@@ -131,7 +131,7 @@ def build_batch_pdf(batch: dict, resumes: list[dict]) -> bytes:
         Paragraph(
             f"Batch ID: {batch.get('id', '—')} &nbsp;&nbsp;|&nbsp;&nbsp; "
             f"Status: {batch.get('status', '—')} &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"Exported: {datetime.now(timezone.utc):%Y-%m-%d %H:%M UTC}",
+            f"Exported: {datetime.now(UTC):%Y-%m-%d %H:%M UTC}",
             s["muted"],
         )
     )

@@ -61,7 +61,6 @@ def render() -> None:
             "an ATS score with prioritized suggestions."
         ).classes("rf-muted")
 
-        # ---------- Input row ----------
         with ui.row().classes("w-full gap-4 flex-wrap"):
             with ui.column().classes("flex-1 min-w-[380px] gap-2"):
                 with ui.row().classes("items-center justify-between w-full"):
@@ -71,9 +70,7 @@ def render() -> None:
                         on_click=lambda: resume_input.set_value(SAMPLE_RESUME),
                     ).props("flat dense color=primary")
                 resume_input = (
-                    ui.textarea()
-                    .classes("w-full")
-                    .props('outlined rows=18')
+                    ui.textarea().classes("w-full").props("outlined rows=18")
                 )
 
             with ui.column().classes("flex-1 min-w-[380px] gap-2"):
@@ -84,12 +81,9 @@ def render() -> None:
                         on_click=lambda: job_input.set_value(SAMPLE_JOB),
                     ).props("flat dense color=primary")
                 job_input = (
-                    ui.textarea()
-                    .classes("w-full")
-                    .props('outlined rows=18')
+                    ui.textarea().classes("w-full").props("outlined rows=18")
                 )
 
-        # ---------- Actions ----------
         with ui.row().classes("w-full items-center gap-4"):
             analyze_btn = ui.button(
                 "Analyze",
@@ -100,10 +94,7 @@ def render() -> None:
 
             status = ui.label().classes("text-sm")
 
-        # ---------- Results container ----------
         results = ui.column().classes("w-full gap-6 mt-4")
-
-        # ---------- Initial state ----------
         analyze_btn.set_enabled(True)
 
 
@@ -129,7 +120,7 @@ async def _run_analyze(
         status.style(f"color: {DANGER}")
         return
 
-    status.set_text("⏳ Analyzing... This can take 5–15 seconds.")
+    status.set_text("⏳ Analyzing... This can take 5-15 seconds.")
     status.style(f"color: {PRIMARY}")
 
     try:
@@ -147,7 +138,6 @@ async def _run_analyze(
 
 
 def _render_results(result: dict) -> None:
-    # ---------- Score header ----------
     with ui.card().classes("rf-card w-full gap-4"):
         with ui.row().classes("items-center justify-between w-full"):
             ui.label("Overall ATS Score").classes("text-lg font-semibold")
@@ -160,11 +150,9 @@ def _render_results(result: dict) -> None:
             f"Level: {result.get('level_label', '')}"
         ).classes("text-sm rf-muted")
 
-        # ---------- Breakdown ----------
         ui.label("Score Breakdown").classes("font-semibold mt-2")
         render_level_chart(result.get("breakdown", {}) or {})
 
-    # ---------- Keywords ----------
     with ui.row().classes("w-full gap-4 flex-wrap"):
         _keyword_card(
             "Matched Keywords",
@@ -177,7 +165,6 @@ def _render_results(result: dict) -> None:
             color=DANGER,
         )
 
-    # ---------- Suggestions ----------
     suggestions = result.get("suggestions", []) or []
     if suggestions:
         with ui.card().classes("rf-card w-full gap-3"):
@@ -199,9 +186,7 @@ def _keyword_card(title: str, keywords: list, color: str) -> None:
             for kw in keywords[:60]:
                 ui.label(kw).classes(
                     "px-2 py-1 rounded text-xs font-medium"
-                ).style(
-                    f"background-color: {color}15; color: {color};"
-                )
+                ).style(f"background-color: {color}15; color: {color};")
 
 
 def _suggestion_row(s: dict) -> None:

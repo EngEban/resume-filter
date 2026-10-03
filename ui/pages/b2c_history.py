@@ -8,7 +8,7 @@ from ui.api_client import APIError
 from ui.components.header import render_header
 from ui.components.score_badge import render_score_badge
 from ui.state import SessionState
-from ui.theme import DANGER, PRIMARY
+from ui.theme import DANGER
 
 
 def render() -> None:

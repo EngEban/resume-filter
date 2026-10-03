@@ -31,10 +31,7 @@ def render() -> None:
             "and full control."
         ).classes("rf-muted")
 
-        # ---------- Current status ----------
         current_card = ui.card().classes("rf-card w-full gap-2")
-
-        # ---------- Provider form ----------
         form_card = ui.card().classes("rf-card w-full gap-4")
 
         async def load_current() -> None:
@@ -56,7 +53,9 @@ def render() -> None:
                         "text-sm"
                     )
                     source = info.get("source")
-                    badge_text = "Your Key" if source == "tenant" else "Platform Default"
+                    badge_text = (
+                        "Your Key" if source == "tenant" else "Platform Default"
+                    )
                     badge_color = SUCCESS if source == "tenant" else PRIMARY
                     ui.label(badge_text).classes(
                         "px-2 py-0.5 rounded text-xs font-semibold"
@@ -70,9 +69,8 @@ def render() -> None:
                         on_click=lambda: _remove_key(state, load_current),
                     ).props("flat dense color=negative")
 
-        await_load = ui.timer(0.1, load_current, once=True)
+        ui.timer(0.1, load_current, once=True)
 
-        # ---------- Provider form ----------
         async def build_form() -> None:
             try:
                 data = await state.client.list_providers()
@@ -87,18 +85,26 @@ def render() -> None:
             with form_card:
                 ui.label("Configure a provider").classes("font-semibold")
 
-                provider_select = ui.select(
-                    options=list(provider_map.keys()),
-                    value=providers[0]["provider"] if providers else "groq",
-                    label="Provider",
-                ).classes("w-full").props("outlined dense")
+                provider_select = (
+                    ui.select(
+                        options=list(provider_map.keys()),
+                        value=providers[0]["provider"] if providers else "groq",
+                        label="Provider",
+                    )
+                    .classes("w-full")
+                    .props("outlined dense")
+                )
 
-                model_select = ui.select(
-                    options=provider_map.get(
-                        provider_select.value, {}
-                    ).get("models", []),
-                    label="Model",
-                ).classes("w-full").props("outlined dense")
+                model_select = (
+                    ui.select(
+                        options=provider_map.get(provider_select.value, {}).get(
+                            "models", []
+                        ),
+                        label="Model",
+                    )
+                    .classes("w-full")
+                    .props("outlined dense")
+                )
 
                 def on_provider_change() -> None:
                     meta = provider_map.get(provider_select.value, {})

@@ -37,7 +37,6 @@ def render() -> None:
             "Manage all your resume screening batches."
         ).classes("rf-muted")
 
-        # ---------- Filters ----------
         with ui.row().classes("gap-3 items-center w-full flex-wrap"):
             search = (
                 ui.input("Search by job title")
@@ -64,7 +63,6 @@ def render() -> None:
                 on_click=lambda: refresh(),
             ).props("color=primary outline dense")
 
-        # ---------- List container ----------
         container = ui.column().classes("w-full gap-3 mt-2")
 
     async def refresh() -> None:
@@ -93,34 +91,34 @@ def _batch_row(b: dict) -> None:
     status = b.get("status", "unknown")
     color = _status_color(status)
 
-    with ui.card().classes(
-        "rf-card w-full cursor-pointer"
-    ).on(
-        "click",
-        lambda: ui.navigate.to(f"/ui/b2b/batches/{b['id']}"),
+    with (
+        ui.card()
+        .classes("rf-card w-full cursor-pointer")
+        .on(
+            "click",
+            lambda: ui.navigate.to(f"/ui/b2b/batches/{b['id']}"),
+        ),
+        ui.row().classes("items-center justify-between w-full"),
     ):
-        with ui.row().classes("items-center justify-between w-full"):
-            with ui.column().classes("gap-0 flex-1"):
-                ui.label(b.get("job_title", "Untitled")).classes(
-                    "text-lg font-semibold"
-                )
-                with ui.row().classes("items-center gap-3"):
-                    ui.label(f"ID: {b['id'][:8]}…").classes(
-                        "text-xs rf-muted"
-                    )
-                    ui.label(
-                        f"Created: {(b.get('created_at') or '')[:19].replace('T', ' ')}"
-                    ).classes("text-xs rf-muted")
+        with ui.column().classes("gap-0 flex-1"):
+            ui.label(b.get("job_title", "Untitled")).classes(
+                "text-lg font-semibold"
+            )
+            with ui.row().classes("items-center gap-3"):
+                ui.label(f"ID: {b['id'][:8]}…").classes("text-xs rf-muted")
+                ui.label(
+                    f"Created: {(b.get('created_at') or '')[:19].replace('T', ' ')}"
+                ).classes("text-xs rf-muted")
 
-            with ui.row().classes("items-center gap-4"):
-                with ui.column().classes("items-end gap-0"):
-                    ui.label(
-                        f"{b.get('completed', 0)}/{b.get('total_resumes', 0)}"
-                    ).classes("text-lg font-bold").style(f"color: {PRIMARY}")
-                    ui.label("completed").classes("text-xs rf-muted")
-                ui.label(status).classes(
-                    "px-3 py-1 rounded text-xs font-semibold"
-                ).style(f"background-color: {color}15; color: {color};")
+        with ui.row().classes("items-center gap-4"):
+            with ui.column().classes("items-end gap-0"):
+                ui.label(
+                    f"{b.get('completed', 0)}/{b.get('total_resumes', 0)}"
+                ).classes("text-lg font-bold").style(f"color: {PRIMARY}")
+                ui.label("completed").classes("text-xs rf-muted")
+            ui.label(status).classes(
+                "px-3 py-1 rounded text-xs font-semibold"
+            ).style(f"background-color: {color}15; color: {color};")
 
 
 def _status_color(status: str | None) -> str:

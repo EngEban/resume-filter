@@ -4,7 +4,6 @@
 # ============================================================
 from pydantic import BaseModel, Field
 
-
 SUPPORTED_PROVIDERS = [
     "groq",
     "openai",

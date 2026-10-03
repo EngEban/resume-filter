@@ -4,10 +4,7 @@
 # ============================================================
 import pytest
 
-from app.services.ats_engine import (
-    WEIGHTS,
-    calculate_ats_score,
-)
+from app.services.ats_engine import WEIGHTS, calculate_ats_score
 
 
 class TestWeights:
@@ -102,7 +99,7 @@ class TestScoring:
             llm_analysis_perfect,
         )
         breakdown = score.breakdown
-        for factor in WEIGHTS.keys():
+        for factor in WEIGHTS:
             assert hasattr(breakdown, factor)
             value = getattr(breakdown, factor)
             assert 0 <= value <= 100
@@ -134,7 +131,6 @@ class TestScoring:
             sample_job_description,
         )
         data = score.to_dict()
-        # Should not raise
         json.dumps(data)
         assert "total" in data
         assert "breakdown" in data
@@ -153,9 +149,6 @@ class TestLevels:
         ],
     )
     def test_level_thresholds(self, score, expected_level):
-        # We test through calculate_ats_score indirectly by
-        # providing crafted inputs.
-        # Easier: test the internal helper directly.
         from app.services.ats_engine import _get_level
 
         level, _ = _get_level(score)

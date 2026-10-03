@@ -6,7 +6,6 @@ from celery import Celery
 
 from app.core.config import settings
 
-
 # ---------- Celery App ----------
 celery_app = Celery(
     "resume_filter",
