@@ -22,8 +22,9 @@ litellm.drop_params = True  # Ignore unsupported params per provider
 @dataclass
 class ResolvedLLMConfig:
     """Resolved LLM configuration for a single request."""
+
     provider: str
-    model: str          # LiteLLM format: "provider/model"
+    model: str  # LiteLLM format: "provider/model"
     api_key: str
     base_url: str | None = None
     source: str = "platform"  # "platform" or "tenant"

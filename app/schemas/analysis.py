@@ -10,12 +10,14 @@ from pydantic import BaseModel, Field
 
 class AnalysisRequest(BaseModel):
     """Payload for a B2C analysis request."""
+
     resume_text: str = Field(..., min_length=50)
     job_description: str = Field(..., min_length=20)
 
 
 class AnalysisResponse(BaseModel):
     """Result of a B2C analysis."""
+
     id: UUID | None = None
     ats_score: float
     level: str

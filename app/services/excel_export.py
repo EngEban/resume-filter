@@ -107,9 +107,7 @@ def build_batch_workbook(batch: dict, resumes: list[dict]) -> bytes:
         cell = ws.cell(row=header_row, column=idx, value=name)
         cell.font = Font(bold=True, color=HEADER_FG, size=11)
         cell.fill = PatternFill("solid", fgColor=HEADER_BG)
-        cell.alignment = Alignment(
-            horizontal="center", vertical="center", wrap_text=True
-        )
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = _thin_border()
         ws.column_dimensions[get_column_letter(idx)].width = width
     ws.row_dimensions[header_row].height = 26
@@ -161,8 +159,7 @@ def build_batch_workbook(batch: dict, resumes: list[dict]) -> bytes:
     # ---------- Freeze + autofilter ----------
     ws.freeze_panes = ws.cell(row=header_row + 1, column=1)
     ws.auto_filter.ref = (
-        f"A{header_row}:"
-        f"{get_column_letter(len(COLUMNS))}{header_row + len(sorted_resumes)}"
+        f"A{header_row}:" f"{get_column_letter(len(COLUMNS))}{header_row + len(sorted_resumes)}"
     )
 
     # ---------- Bytes ----------
@@ -216,8 +213,16 @@ def build_comparison_workbook(
         ws.column_dimensions[get_column_letter(idx)].width = 24
 
     rows = [
-        ("ATS Score", lambda r: round(float(r["ats_score"]), 1) if r.get("ats_score") is not None else "—"),
-        ("Level", lambda r: _level_from_score(float(r["ats_score"])) if r.get("ats_score") is not None else "—"),
+        (
+            "ATS Score",
+            lambda r: round(float(r["ats_score"]), 1) if r.get("ats_score") is not None else "—",
+        ),
+        (
+            "Level",
+            lambda r: _level_from_score(float(r["ats_score"]))
+            if r.get("ats_score") is not None
+            else "—",
+        ),
         ("Email", lambda r: r.get("candidate_email") or "—"),
         ("Phone", lambda r: r.get("candidate_phone") or "—"),
         ("Status", lambda r: r.get("status") or "—"),

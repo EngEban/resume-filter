@@ -18,9 +18,7 @@ def render() -> None:
         return
 
     with (
-        ui.column().classes(
-            "w-full items-center justify-center min-h-screen gap-6 p-6"
-        ),
+        ui.column().classes("w-full items-center justify-center min-h-screen gap-6 p-6"),
         ui.card().classes("rf-card w-96 gap-4 p-8"),
     ):
         with ui.column().classes("items-center gap-1"):
@@ -56,9 +54,7 @@ def render() -> None:
             state.set_authenticated(result["access_token"], me)
             ui.navigate.to("/ui/dashboard")
 
-        ui.button("Sign in", on_click=do_login).props(
-            "color=primary unelevated"
-        ).classes("w-full")
+        ui.button("Sign in", on_click=do_login).props("color=primary unelevated").classes("w-full")
 
         ui.separator()
 

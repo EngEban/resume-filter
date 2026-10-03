@@ -85,9 +85,7 @@ class APIClient:
         url = f"{self.base_url}{path}"
         try:
             async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
-                response = await client.get(
-                    url, headers=self._headers(), params=params
-                )
+                response = await client.get(url, headers=self._headers(), params=params)
         except httpx.RequestError as exc:
             logger.error("Download failed: %s", exc)
             raise APIError(0, "Network error. Please try again.") from exc
@@ -216,9 +214,7 @@ class APIClient:
         )
 
     async def reprocess_batch(self, batch_id: str) -> dict:
-        return await self._request(
-            "POST", f"/b2b/batches/{batch_id}/reprocess"
-        )
+        return await self._request("POST", f"/b2b/batches/{batch_id}/reprocess")
 
     async def export_batch_xlsx(self, batch_id: str) -> bytes:
         return await self._download(f"/b2b/batches/{batch_id}/export.xlsx")
@@ -240,9 +236,7 @@ class APIClient:
             params={"batch_id": batch_id, "limit": limit},
         )
 
-    async def export_comparison_xlsx(
-        self, batch_id: str, limit: int = 10
-    ) -> bytes:
+    async def export_comparison_xlsx(self, batch_id: str, limit: int = 10) -> bytes:
         return await self._download(
             "/b2b/resumes/compare/export.xlsx",
             params={"batch_id": batch_id, "limit": limit},
@@ -250,9 +244,7 @@ class APIClient:
 
     # ---------- b2b analytics ----------
     async def batch_analytics(self, batch_id: str) -> dict:
-        return await self._request(
-            "GET", f"/b2b/analytics/batches/{batch_id}"
-        )
+        return await self._request("GET", f"/b2b/analytics/batches/{batch_id}")
 
     async def tenant_overview(self) -> dict:
         return await self._request("GET", "/b2b/analytics/overview")
@@ -293,6 +285,4 @@ class APIClient:
             payload["api_key"] = api_key
         if base_url:
             payload["base_url"] = base_url
-        return await self._request(
-            "POST", "/b2b/settings/llm/test", json=payload
-        )
+        return await self._request("POST", "/b2b/settings/llm/test", json=payload)

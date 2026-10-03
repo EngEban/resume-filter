@@ -89,9 +89,7 @@ class TestMatchKeywords:
         assert "python" in result.matched_keywords
         assert "fastapi" in result.matched_keywords
 
-    def test_weak_resume_has_high_missing(
-        self, sample_job_description, weak_resume_text
-    ):
+    def test_weak_resume_has_high_missing(self, sample_job_description, weak_resume_text):
         result = match_keywords(weak_resume_text, sample_job_description)
         assert result.match_ratio < 0.5
         assert "kubernetes" in result.missing_keywords

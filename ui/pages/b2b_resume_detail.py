@@ -27,9 +27,9 @@ def render(resume_id: str) -> None:
 
     with ui.column().classes("w-full max-w-5xl mx-auto p-6 gap-4"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.link("← Back", "javascript:history.back()").classes(
-                "text-sm no-underline"
-            ).style(f"color: {PRIMARY}")
+            ui.link("← Back", "javascript:history.back()").classes("text-sm no-underline").style(
+                f"color: {PRIMARY}"
+            )
             ui.label("Resume Report").classes("text-2xl font-bold")
 
             async def dl_pdf() -> None:
@@ -39,9 +39,7 @@ def render(resume_id: str) -> None:
                 except APIError as exc:
                     ui.notify(exc.message, color="negative")
 
-            ui.button("📄 Download PDF", on_click=dl_pdf).props(
-                "outline dense color=primary"
-            )
+            ui.button("📄 Download PDF", on_click=dl_pdf).props("outline dense color=primary")
 
         container = ui.column().classes("w-full gap-4")
 
@@ -64,9 +62,9 @@ def _render_report(r: dict) -> None:
     with ui.card().classes("rf-card w-full gap-3"):
         with ui.row().classes("items-center justify-between w-full"):
             with ui.column().classes("gap-0"):
-                ui.label(
-                    r.get("candidate_name") or "Unknown Candidate"
-                ).classes("text-xl font-bold")
+                ui.label(r.get("candidate_name") or "Unknown Candidate").classes(
+                    "text-xl font-bold"
+                )
                 if r.get("candidate_email"):
                     ui.label(r["candidate_email"]).classes("text-sm rf-muted")
                 if r.get("candidate_phone"):
@@ -78,9 +76,7 @@ def _render_report(r: dict) -> None:
 
         ui.label(f"File: {r.get('file_name', '—')}").classes("text-xs rf-muted")
         if r.get("status") == "failed":
-            ui.label(f"Error: {r.get('error_message', '')}").style(
-                f"color: {DANGER}"
-            )
+            ui.label(f"Error: {r.get('error_message', '')}").style(f"color: {DANGER}")
 
     breakdown = r.get("score_breakdown") or {}
     if breakdown:
@@ -94,9 +90,7 @@ def _render_report(r: dict) -> None:
             ui.label("Missing Keywords").classes("font-semibold")
             with ui.row().classes("gap-2 flex-wrap"):
                 for kw in missing[:60]:
-                    ui.label(kw).classes(
-                        "px-2 py-1 rounded text-xs"
-                    ).style(
+                    ui.label(kw).classes("px-2 py-1 rounded text-xs").style(
                         f"background-color: {DANGER}15; color: {DANGER};"
                     )
 
@@ -105,8 +99,10 @@ def _render_report(r: dict) -> None:
         with ui.card().classes("rf-card w-full gap-2"):
             ui.label("Suggestions").classes("font-semibold")
             for s in suggestions:
-                with ui.column().classes("gap-0 border-l-4 pl-3 mt-2").style(
-                    f"border-color: {PRIMARY}"
+                with (
+                    ui.column()
+                    .classes("gap-0 border-l-4 pl-3 mt-2")
+                    .style(f"border-color: {PRIMARY}")
                 ):
                     ui.label(s.get("type", "")).classes("text-xs rf-muted")
                     ui.label(s.get("description", "")).classes("text-sm")

@@ -38,11 +38,7 @@ def process_batch(self, batch_id: str) -> dict:
                 raise ValueError(f"Batch {batch_id} not found")
 
             resumes = (
-                session.execute(
-                    select(Resume).where(Resume.batch_id == batch.id)
-                )
-                .scalars()
-                .all()
+                session.execute(select(Resume).where(Resume.batch_id == batch.id)).scalars().all()
             )
 
             if not resumes:
@@ -90,9 +86,7 @@ def finalize_batch(results: list, batch_id: str) -> dict:
             return {"batch_id": batch_id, "status": "not_found"}
 
         statuses = (
-            session.execute(
-                select(Resume.status).where(Resume.batch_id == batch.id)
-            )
+            session.execute(select(Resume.status).where(Resume.batch_id == batch.id))
             .scalars()
             .all()
         )

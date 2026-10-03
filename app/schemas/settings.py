@@ -52,6 +52,7 @@ SUGGESTED_MODELS: dict[str, list[str]] = {
 
 class LLMSettingsUpdate(BaseModel):
     """Payload for updating a tenant's LLM configuration."""
+
     provider: str = Field(..., pattern="^[a-z_]+$")
     model: str = Field(..., min_length=3, max_length=150)
     api_key: str | None = Field(default=None, max_length=500)
@@ -60,6 +61,7 @@ class LLMSettingsUpdate(BaseModel):
 
 class LLMSettingsRead(BaseModel):
     """Current tenant LLM settings (never exposes the key)."""
+
     provider: str
     model: str
     has_custom_key: bool
@@ -69,6 +71,7 @@ class LLMSettingsRead(BaseModel):
 
 class ProviderInfo(BaseModel):
     """Available provider and its suggested models."""
+
     provider: str
     models: list[str]
     requires_api_key: bool
@@ -77,12 +80,14 @@ class ProviderInfo(BaseModel):
 
 class ProvidersListResponse(BaseModel):
     """List of available providers."""
+
     providers: list[ProviderInfo]
     platform_default: dict
 
 
 class ConnectionTestResult(BaseModel):
     """Result of a connection test."""
+
     success: bool
     message: str
     latency_ms: int | None = None

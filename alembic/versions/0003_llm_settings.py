@@ -4,6 +4,7 @@ Revision ID: 0003_llm_settings
 Revises: 0002_rls
 Create Date: 2026-10-02
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa

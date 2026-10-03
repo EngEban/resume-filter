@@ -1,4 +1,5 @@
 """Drop all tables and re-run Alembic migrations (development only)."""
+
 import asyncio
 import logging
 import subprocess

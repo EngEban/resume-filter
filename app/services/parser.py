@@ -48,8 +48,17 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
 EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 PHONE_RE = re.compile(r"(\+?\d[\d\s\-()]{7,}\d)")
 LOCATION_HINTS = [
-    "gaza", "ramallah", "jerusalem", "hebron", "nablus",
-    "amman", "cairo", "riyadh", "dubai", "doha", "kuwait",
+    "gaza",
+    "ramallah",
+    "jerusalem",
+    "hebron",
+    "nablus",
+    "amman",
+    "cairo",
+    "riyadh",
+    "dubai",
+    "doha",
+    "kuwait",
 ]
 
 SECTION_HEADERS = {
@@ -73,7 +82,7 @@ def detect_sections(text: str) -> dict[str, str]:
         for keyword in keywords:
             idx = lower.find(keyword)
             if idx != -1:
-                found[section] = text[idx: idx + 800]
+                found[section] = text[idx : idx + 800]
                 break
 
     return found

@@ -33,9 +33,7 @@ def render() -> None:
                 on_click=lambda: _open_new_batch_dialog(state, refresh),
             ).props("color=primary unelevated")
 
-        ui.label(
-            "Manage all your resume screening batches."
-        ).classes("rf-muted")
+        ui.label("Manage all your resume screening batches.").classes("rf-muted")
 
         with ui.row().classes("gap-3 items-center w-full flex-wrap"):
             search = (
@@ -101,24 +99,22 @@ def _batch_row(b: dict) -> None:
         ui.row().classes("items-center justify-between w-full"),
     ):
         with ui.column().classes("gap-0 flex-1"):
-            ui.label(b.get("job_title", "Untitled")).classes(
-                "text-lg font-semibold"
-            )
+            ui.label(b.get("job_title", "Untitled")).classes("text-lg font-semibold")
             with ui.row().classes("items-center gap-3"):
                 ui.label(f"ID: {b['id'][:8]}…").classes("text-xs rf-muted")
-                ui.label(
-                    f"Created: {(b.get('created_at') or '')[:19].replace('T', ' ')}"
-                ).classes("text-xs rf-muted")
+                ui.label(f"Created: {(b.get('created_at') or '')[:19].replace('T', ' ')}").classes(
+                    "text-xs rf-muted"
+                )
 
         with ui.row().classes("items-center gap-4"):
             with ui.column().classes("items-end gap-0"):
-                ui.label(
-                    f"{b.get('completed', 0)}/{b.get('total_resumes', 0)}"
-                ).classes("text-lg font-bold").style(f"color: {PRIMARY}")
+                ui.label(f"{b.get('completed', 0)}/{b.get('total_resumes', 0)}").classes(
+                    "text-lg font-bold"
+                ).style(f"color: {PRIMARY}")
                 ui.label("completed").classes("text-xs rf-muted")
-            ui.label(status).classes(
-                "px-3 py-1 rounded text-xs font-semibold"
-            ).style(f"background-color: {color}15; color: {color};")
+            ui.label(status).classes("px-3 py-1 rounded text-xs font-semibold").style(
+                f"background-color: {color}15; color: {color};"
+            )
 
 
 def _status_color(status: str | None) -> str:
@@ -132,23 +128,13 @@ def _status_color(status: str | None) -> str:
 
 
 def _open_new_batch_dialog(state: SessionState, on_success) -> None:
-    with ui.dialog() as dialog, ui.card().classes(
-        "rf-card w-[40rem] gap-4 p-6"
-    ):
+    with ui.dialog() as dialog, ui.card().classes("rf-card w-[40rem] gap-4 p-6"):
         ui.label("Create New Batch").classes("text-xl font-bold")
 
-        job_title = (
-            ui.input("Job Title").classes("w-full").props("outlined dense")
-        )
-        job_description = (
-            ui.textarea("Job Description")
-            .classes("w-full")
-            .props("outlined rows=6")
-        )
+        job_title = ui.input("Job Title").classes("w-full").props("outlined dense")
+        job_description = ui.textarea("Job Description").classes("w-full").props("outlined rows=6")
         job_requirements = (
-            ui.textarea("Job Requirements (optional)")
-            .classes("w-full")
-            .props("outlined rows=3")
+            ui.textarea("Job Requirements (optional)").classes("w-full").props("outlined rows=3")
         )
 
         upload = (
@@ -200,9 +186,7 @@ def _open_new_batch_dialog(state: SessionState, on_success) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 mt-2"):
             ui.button("Cancel", on_click=dialog.close).props("flat")
-            ui.button("Create", on_click=submit).props(
-                "color=primary unelevated"
-            )
+            ui.button("Create", on_click=submit).props("color=primary unelevated")
 
     dialog.open()
 

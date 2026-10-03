@@ -46,9 +46,7 @@ async def analyze_resume(
         )
     except Exception as exc:
         logger.exception("LLM analysis failed: %s", exc)
-        raise HTTPException(
-            status_code=502, detail="LLM provider error"
-        ) from exc
+        raise HTTPException(status_code=502, detail="LLM provider error") from exc
 
     score = calculate_ats_score(
         parsed_resume=parsed,

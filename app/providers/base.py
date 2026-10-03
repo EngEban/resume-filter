@@ -9,6 +9,7 @@ from dataclasses import dataclass
 @dataclass
 class LLMResponse:
     """Structured response from an LLM provider."""
+
     content: str
     model: str
     provider: str

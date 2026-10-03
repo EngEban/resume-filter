@@ -61,21 +61,13 @@ def _render(data: dict) -> None:
     # ---------- Score stats ----------
     with ui.row().classes("gap-4 flex-wrap mt-2"):
         avg = data.get("avg_score")
-        render_stat_card(
-            "Avg Score", f"{avg:.1f}" if avg is not None else "—", PRIMARY
-        )
+        render_stat_card("Avg Score", f"{avg:.1f}" if avg is not None else "—", PRIMARY)
         med = data.get("median_score")
-        render_stat_card(
-            "Median", f"{med:.1f}" if med is not None else "—", PRIMARY
-        )
+        render_stat_card("Median", f"{med:.1f}" if med is not None else "—", PRIMARY)
         mn = data.get("min_score")
-        render_stat_card(
-            "Min", f"{mn:.1f}" if mn is not None else "—", NEUTRAL
-        )
+        render_stat_card("Min", f"{mn:.1f}" if mn is not None else "—", NEUTRAL)
         mx = data.get("max_score")
-        render_stat_card(
-            "Max", f"{mx:.1f}" if mx is not None else "—", NEUTRAL
-        )
+        render_stat_card("Max", f"{mx:.1f}" if mx is not None else "—", NEUTRAL)
 
     # ---------- Distribution ----------
     dist = data.get("score_distribution", {}) or {}
@@ -94,9 +86,9 @@ def _render(data: dict) -> None:
                 with ui.row().classes("justify-between w-full"):
                     ui.label(level.replace("_", " ").title()).classes("text-sm")
                     ui.label(f"{count}").classes("text-sm rf-muted")
-                ui.linear_progress(
-                    value=count / total, show_value=False, color=color
-                ).classes("w-full")
+                ui.linear_progress(value=count / total, show_value=False, color=color).classes(
+                    "w-full"
+                )
 
     # ---------- Top missing keywords ----------
     top_missing = data.get("top_missing_keywords", []) or []
@@ -107,8 +99,6 @@ def _render(data: dict) -> None:
                 for item in top_missing:
                     kw = item.get("keyword", "")
                     count = item.get("count", 0)
-                    ui.label(f"{kw} ({count})").classes(
-                        "px-2 py-1 rounded text-xs"
-                    ).style(
+                    ui.label(f"{kw} ({count})").classes("px-2 py-1 rounded text-xs").style(
                         f"background-color: {DANGER}15; color: {DANGER};"
                     )

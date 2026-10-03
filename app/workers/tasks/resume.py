@@ -48,9 +48,7 @@ async def _process_resume_async(
             raise ValueError(f"Resume {resume_id} not found")
         batch = session.get(Batch, resume.batch_id)
         job_description = batch.job_description if batch else ""
-        tenant = (
-            session.get(Tenant, resume.tenant_id) if resume.tenant_id else None
-        )
+        tenant = session.get(Tenant, resume.tenant_id) if resume.tenant_id else None
 
     # --- Download file from MinIO ---
     file_bytes = download_file(storage_path)
@@ -117,9 +115,7 @@ def process_resume(
 ) -> dict:
     """Process a single resume inside the Celery worker."""
     try:
-        result = asyncio.run(
-            _process_resume_async(resume_id, storage_path, file_name)
-        )
+        result = asyncio.run(_process_resume_async(resume_id, storage_path, file_name))
         return result
     except Exception as exc:
         logger.exception("process_resume failed for %s: %s", resume_id, exc)
@@ -138,6 +134,4 @@ def process_resume(
             logger.exception("Failed to mark resume %s as failed", resume_id)
 
         # Retry with exponential backoff
-        raise self.retry(
-            exc=exc, countdown=30 * (self.request.retries + 1)
-        ) from exc
+        raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1)) from exc

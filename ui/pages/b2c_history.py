@@ -56,9 +56,7 @@ def render() -> None:
 def _history_row(item: dict) -> None:
     with ui.card().classes("rf-card w-full gap-2"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.label(
-                item.get("created_at", "")[:19].replace("T", " ")
-            ).classes("rf-muted text-sm")
+            ui.label(item.get("created_at", "")[:19].replace("T", " ")).classes("rf-muted text-sm")
             render_score_badge(
                 float(item.get("ats_score", 0) or 0),
                 _level_from_score(float(item.get("ats_score", 0) or 0)),
@@ -69,9 +67,7 @@ def _history_row(item: dict) -> None:
             with ui.row().classes("gap-2 flex-wrap mt-1"):
                 ui.label("Missing:").classes("text-xs rf-muted")
                 for kw in missing[:12]:
-                    ui.label(kw).classes(
-                        "px-2 py-0.5 rounded text-xs"
-                    ).style(
+                    ui.label(kw).classes("px-2 py-0.5 rounded text-xs").style(
                         f"background-color: {DANGER}15; color: {DANGER};"
                     )
 

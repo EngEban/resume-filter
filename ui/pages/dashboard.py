@@ -20,9 +20,7 @@ def render() -> None:
     render_header(state)
 
     with ui.column().classes("w-full max-w-5xl mx-auto p-6 gap-6"):
-        ui.label(
-            f"👋 Welcome, {state.user.get('email')}"
-        ).classes("text-2xl font-bold")
+        ui.label(f"👋 Welcome, {state.user.get('email')}").classes("text-2xl font-bold")
 
         if state.account_type == "b2c":
             _render_b2c_home()
@@ -60,17 +58,13 @@ def _render_b2b_home() -> None:
         _action_card(
             icon="📦",
             title="Batches",
-            description=(
-                "Upload resumes and screen them against a job description."
-            ),
+            description=("Upload resumes and screen them against a job description."),
             target="/ui/b2b/batches",
         )
         _action_card(
             icon="⚙️",
             title="AI Settings",
-            description=(
-                "Connect your own AI provider (OpenAI, Anthropic, Gemini, ...)."
-            ),
+            description=("Connect your own AI provider (OpenAI, Anthropic, Gemini, ...)."),
             target="/ui/b2b/settings",
         )
 
@@ -81,12 +75,12 @@ def _action_card(
     description: str,
     target: str,
 ) -> None:
-    with ui.card().classes("rf-card w-80 gap-2 p-6 cursor-pointer").on(
-        "click", lambda: ui.navigate.to(target)
+    with (
+        ui.card()
+        .classes("rf-card w-80 gap-2 p-6 cursor-pointer")
+        .on("click", lambda: ui.navigate.to(target))
     ):
         ui.label(icon).classes("text-3xl")
         ui.label(title).classes("text-lg font-bold")
         ui.label(description).classes("text-sm rf-muted")
-        ui.label("Open →").classes("text-sm font-semibold mt-2").style(
-            f"color: {PRIMARY}"
-        )
+        ui.label("Open →").classes("text-sm font-semibold mt-2").style(f"color: {PRIMARY}")

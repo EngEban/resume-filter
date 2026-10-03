@@ -10,6 +10,7 @@ from ui.api_client import APIClient
 @dataclass
 class SessionState:
     """State attached to each NiceGUI browser session."""
+
     client: APIClient = field(default_factory=APIClient)
     user: dict | None = None
 

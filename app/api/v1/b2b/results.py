@@ -34,9 +34,7 @@ async def get_resume_report(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> dict:
     """Return a detailed report for a single resume."""
-    resume = (
-        await db.execute(select(Resume).where(Resume.id == resume_id))
-    ).scalar_one_or_none()
+    resume = (await db.execute(select(Resume).where(Resume.id == resume_id))).scalar_one_or_none()
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -66,9 +64,7 @@ async def export_resume_pdf(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a single candidate's report as a PDF."""
-    resume = (
-        await db.execute(select(Resume).where(Resume.id == resume_id))
-    ).scalar_one_or_none()
+    resume = (await db.execute(select(Resume).where(Resume.id == resume_id))).scalar_one_or_none()
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -104,13 +100,17 @@ async def compare_candidates(
 ) -> dict:
     """Return the top-N candidates of a batch, side by side."""
     resumes = (
-        await db.execute(
-            select(Resume)
-            .where(Resume.batch_id == batch_id)
-            .order_by(Resume.ats_score.desc().nullslast())
-            .limit(limit)
+        (
+            await db.execute(
+                select(Resume)
+                .where(Resume.batch_id == batch_id)
+                .order_by(Resume.ats_score.desc().nullslast())
+                .limit(limit)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     if not resumes:
         raise HTTPException(status_code=404, detail="No resumes found")
@@ -145,20 +145,22 @@ async def export_comparison_xlsx(
     limit: Annotated[int, Query(ge=2, le=20)] = 10,
 ) -> Response:
     """Export a candidate comparison as an Excel workbook."""
-    batch = (
-        await db.execute(select(Batch).where(Batch.id == batch_id))
-    ).scalar_one_or_none()
+    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
 
     resumes = (
-        await db.execute(
-            select(Resume)
-            .where(Resume.batch_id == batch_id)
-            .order_by(Resume.ats_score.desc().nullslast())
-            .limit(limit)
+        (
+            await db.execute(
+                select(Resume)
+                .where(Resume.batch_id == batch_id)
+                .order_by(Resume.ats_score.desc().nullslast())
+                .limit(limit)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     if not resumes:
         raise HTTPException(status_code=404, detail="No resumes found")
@@ -184,9 +186,6 @@ async def export_comparison_xlsx(
     filename = f"compare_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
+        media_type=("application/vnd.openxmlformats-officedocument." "spreadsheetml.sheet"),
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

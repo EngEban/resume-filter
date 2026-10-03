@@ -69,9 +69,7 @@ def render() -> None:
                         "Load sample",
                         on_click=lambda: resume_input.set_value(SAMPLE_RESUME),
                     ).props("flat dense color=primary")
-                resume_input = (
-                    ui.textarea().classes("w-full").props("outlined rows=18")
-                )
+                resume_input = ui.textarea().classes("w-full").props("outlined rows=18")
 
             with ui.column().classes("flex-1 min-w-[380px] gap-2"):
                 with ui.row().classes("items-center justify-between w-full"):
@@ -80,16 +78,12 @@ def render() -> None:
                         "Load sample",
                         on_click=lambda: job_input.set_value(SAMPLE_JOB),
                     ).props("flat dense color=primary")
-                job_input = (
-                    ui.textarea().classes("w-full").props("outlined rows=18")
-                )
+                job_input = ui.textarea().classes("w-full").props("outlined rows=18")
 
         with ui.row().classes("w-full items-center gap-4"):
             analyze_btn = ui.button(
                 "Analyze",
-                on_click=lambda: _run_analyze(
-                    state, resume_input, job_input, status, results
-                ),
+                on_click=lambda: _run_analyze(state, resume_input, job_input, status, results),
             ).props("color=primary unelevated")
 
             status = ui.label().classes("text-sm")
@@ -146,9 +140,7 @@ def _render_results(result: dict) -> None:
                 result.get("level", "weak"),
             )
 
-        ui.label(
-            f"Level: {result.get('level_label', '')}"
-        ).classes("text-sm rf-muted")
+        ui.label(f"Level: {result.get('level_label', '')}").classes("text-sm rf-muted")
 
         ui.label("Score Breakdown").classes("font-semibold mt-2")
         render_level_chart(result.get("breakdown", {}) or {})
@@ -184,9 +176,9 @@ def _keyword_card(title: str, keywords: list, color: str) -> None:
 
         with ui.row().classes("gap-2 flex-wrap"):
             for kw in keywords[:60]:
-                ui.label(kw).classes(
-                    "px-2 py-1 rounded text-xs font-medium"
-                ).style(f"background-color: {color}15; color: {color};")
+                ui.label(kw).classes("px-2 py-1 rounded text-xs font-medium").style(
+                    f"background-color: {color}15; color: {color};"
+                )
 
 
 def _suggestion_row(s: dict) -> None:
@@ -197,21 +189,15 @@ def _suggestion_row(s: dict) -> None:
         "low": SUCCESS,
     }.get(priority, PRIMARY)
 
-    with ui.column().classes("w-full gap-1 border-l-4 pl-3").style(
-        f"border-color: {p_color}"
-    ):
+    with ui.column().classes("w-full gap-1 border-l-4 pl-3").style(f"border-color: {p_color}"):
         with ui.row().classes("items-center gap-2"):
-            ui.label(priority.upper()).classes("text-xs font-bold").style(
-                f"color: {p_color}"
-            )
+            ui.label(priority.upper()).classes("text-xs font-bold").style(f"color: {p_color}")
             ui.label(s.get("type", "")).classes("text-xs rf-muted")
         ui.label(s.get("description", "")).classes("text-sm")
 
         if s.get("original"):
-            ui.label(f"Original: {s['original']}").classes(
-                "text-xs rf-muted italic mt-1"
-            )
+            ui.label(f"Original: {s['original']}").classes("text-xs rf-muted italic mt-1")
         if s.get("suggestion"):
-            ui.label(f"Suggested: {s['suggestion']}").classes(
-                "text-xs mt-1"
-            ).style(f"color: {SUCCESS}")
+            ui.label(f"Suggested: {s['suggestion']}").classes("text-xs mt-1").style(
+                f"color: {SUCCESS}"
+            )

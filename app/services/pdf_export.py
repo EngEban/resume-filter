@@ -250,13 +250,10 @@ def build_resume_pdf(report: dict) -> bytes:
     color = LEVEL_COLORS[level]
 
     # ---------- Header ----------
-    story.append(
-        Paragraph(report.get("candidate_name") or "Unknown Candidate", s["title"])
-    )
+    story.append(Paragraph(report.get("candidate_name") or "Unknown Candidate", s["title"]))
     story.append(
         Paragraph(
-            f'<font color="{color.hexval()}"><b>'
-            f"{score:.1f} — {LEVEL_LABELS[level]}</b></font>"
+            f'<font color="{color.hexval()}"><b>' f"{score:.1f} — {LEVEL_LABELS[level]}</b></font>"
             if score is not None
             else "No score available.",
             s["body"],
@@ -284,9 +281,7 @@ def build_resume_pdf(report: dict) -> bytes:
     missing = report.get("missing_keywords") or []
     if missing:
         story.append(Paragraph("Missing Keywords", s["h2"]))
-        story.append(
-            Paragraph(", ".join(str(k) for k in missing[:60]), s["body"])
-        )
+        story.append(Paragraph(", ".join(str(k) for k in missing[:60]), s["body"]))
         story.append(Spacer(1, 0.5 * cm))
 
     # ---------- Suggestions ----------

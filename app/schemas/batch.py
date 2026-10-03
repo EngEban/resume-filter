@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class BatchCreate(BaseModel):
     """Metadata when creating a batch (files uploaded separately)."""
+
     job_title: str = Field(..., min_length=2, max_length=255)
     job_description: str = Field(..., min_length=20)
     job_requirements: str | None = None
@@ -17,6 +18,7 @@ class BatchCreate(BaseModel):
 
 class BatchRead(BaseModel):
     """Batch status and progress."""
+
     id: UUID
     tenant_id: UUID
     job_title: str
@@ -32,6 +34,7 @@ class BatchRead(BaseModel):
 
 class ResumeRead(BaseModel):
     """Single resume result within a batch."""
+
     id: UUID
     file_name: str
     candidate_name: str | None = None

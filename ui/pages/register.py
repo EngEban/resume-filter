@@ -24,9 +24,7 @@ def render() -> None:
     is_b2b_default = "b2b" in ui.context.client.page.path
 
     with (
-        ui.column().classes(
-            "w-full items-center justify-center min-h-screen gap-6 p-6"
-        ),
+        ui.column().classes("w-full items-center justify-center min-h-screen gap-6 p-6"),
         ui.card().classes("rf-card w-[28rem] gap-4 p-8"),
     ):
         with ui.column().classes("items-center gap-1"):
@@ -40,11 +38,7 @@ def render() -> None:
 
         b2b_fields = ui.column().classes("w-full gap-3")
         with b2b_fields:
-            org_name = (
-                ui.input("Organization Name")
-                .classes("w-full")
-                .props("outlined dense")
-            )
+            org_name = ui.input("Organization Name").classes("w-full").props("outlined dense")
             org_slug = (
                 ui.input("Organization Slug (a-z, 0-9, -)")
                 .classes("w-full")
@@ -84,24 +78,19 @@ def render() -> None:
 
             if account_type.value == "b2b":
                 if not org_name.value or not org_slug.value:
-                    status.set_text(
-                        "Organization name and slug are required."
-                    )
+                    status.set_text("Organization name and slug are required.")
                     status.style("color: #dc2626")
                     return
                 if not _SLUG_RE.match(org_slug.value):
                     status.set_text(
-                        "Slug must contain only lowercase letters, "
-                        "digits, and hyphens."
+                        "Slug must contain only lowercase letters, " "digits, and hyphens."
                     )
                     status.style("color: #dc2626")
                     return
 
             try:
                 if account_type.value == "b2c":
-                    result = await state.client.register_b2c(
-                        email.value, password.value
-                    )
+                    result = await state.client.register_b2c(email.value, password.value)
                 else:
                     result = await state.client.register_b2b(
                         org_name.value,
@@ -119,12 +108,12 @@ def render() -> None:
             state.set_authenticated(result["access_token"], me)
             ui.navigate.to("/ui/dashboard")
 
-        ui.button("Create account", on_click=do_register).props(
-            "color=primary unelevated"
-        ).classes("w-full")
+        ui.button("Create account", on_click=do_register).props("color=primary unelevated").classes(
+            "w-full"
+        )
 
         with ui.row().classes("items-center justify-center w-full gap-2"):
             ui.label("Already registered?").classes("rf-muted text-sm")
-            ui.link("Sign in", "/ui/login").classes(
-                "text-sm font-semibold no-underline"
-            ).style(f"color: {PRIMARY}")
+            ui.link("Sign in", "/ui/login").classes("text-sm font-semibold no-underline").style(
+                f"color: {PRIMARY}"
+            )

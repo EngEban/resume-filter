@@ -38,7 +38,9 @@ def ensure_bucket() -> None:
         logger.info("Created MinIO bucket: %s", settings.MINIO_BUCKET)
 
 
-def upload_file(object_name: str, data: bytes, content_type: str = "application/octet-stream") -> str:
+def upload_file(
+    object_name: str, data: bytes, content_type: str = "application/octet-stream"
+) -> str:
     """
     Upload bytes to MinIO and return the object path.
     """
@@ -59,7 +61,7 @@ def download_file(object_name: str) -> bytes:
     Download an object's bytes. Accepts either a raw name or 'bucket/name'.
     """
     if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1:]
+        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
 
     client = get_client()
     response = None
@@ -78,7 +80,7 @@ def download_file(object_name: str) -> bytes:
 def delete_file(object_name: str) -> None:
     """Delete an object from MinIO."""
     if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1:]
+        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
     try:
         get_client().remove_object(settings.MINIO_BUCKET, object_name)
     except S3Error as exc:
@@ -88,7 +90,7 @@ def delete_file(object_name: str) -> None:
 def get_presigned_url(object_name: str, expires_minutes: int = 60) -> str:
     """Generate a temporary download URL."""
     if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1:]
+        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
     return get_client().presigned_get_object(
         settings.MINIO_BUCKET,
         object_name,

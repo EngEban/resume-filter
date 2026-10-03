@@ -28,12 +28,10 @@ def render(batch_id: str) -> None:
 
     with ui.column().classes("w-full max-w-6xl mx-auto p-6 gap-4"):
         with ui.row().classes("items-center gap-2"):
-            ui.link("← Back to batches", "/ui/b2b/batches").classes(
-                "text-sm no-underline"
-            ).style(f"color: {PRIMARY}")
-            ui.label(f"Batch: {batch_id[:8]}…").classes(
-                "text-xl font-bold"
+            ui.link("← Back to batches", "/ui/b2b/batches").classes("text-sm no-underline").style(
+                f"color: {PRIMARY}"
             )
+            ui.label(f"Batch: {batch_id[:8]}…").classes("text-xl font-bold")
 
         # ---------- Summary card ----------
         summary_row = ui.row().classes("gap-4 flex-wrap mt-2")
@@ -83,8 +81,18 @@ def render(batch_id: str) -> None:
 
             with ui.card().classes("rf-card w-full p-0 overflow-hidden"):
                 columns = [
-                    {"name": "name", "label": "Candidate", "field": "candidate_name", "align": "left"},
-                    {"name": "email", "label": "Email", "field": "candidate_email", "align": "left"},
+                    {
+                        "name": "name",
+                        "label": "Candidate",
+                        "field": "candidate_name",
+                        "align": "left",
+                    },
+                    {
+                        "name": "email",
+                        "label": "Email",
+                        "field": "candidate_email",
+                        "align": "left",
+                    },
                     {"name": "score", "label": "Score", "field": "ats_score", "align": "left"},
                     {"name": "status", "label": "Status", "field": "status", "align": "left"},
                 ]
@@ -100,9 +108,7 @@ def render(batch_id: str) -> None:
                             "candidate_name": r.get("candidate_name") or "—",
                             "candidate_email": r.get("candidate_email") or "—",
                             "ats_score": (
-                                f"{r['ats_score']:.1f}"
-                                if r.get("ats_score") is not None
-                                else "—"
+                                f"{r['ats_score']:.1f}" if r.get("ats_score") is not None else "—"
                             ),
                             "status": r.get("status", "—"),
                         }
@@ -116,9 +122,7 @@ def render(batch_id: str) -> None:
 
                 table.on(
                     "rowClick",
-                    lambda e: ui.navigate.to(
-                        f"/ui/b2b/resumes/{e.args[1]['id']}"
-                    ),
+                    lambda e: ui.navigate.to(f"/ui/b2b/resumes/{e.args[1]['id']}"),
                 )
 
     ui.timer(0.1, refresh, once=True)

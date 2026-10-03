@@ -1,4 +1,5 @@
 """Seed the database with a default tenant for development."""
+
 import asyncio
 import logging
 
@@ -16,9 +17,7 @@ DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000001"
 
 async def seed() -> None:
     async with get_session() as session:
-        existing = await session.execute(
-            select(Tenant).where(Tenant.slug == "default")
-        )
+        existing = await session.execute(select(Tenant).where(Tenant.slug == "default"))
         if existing.scalar_one_or_none():
             logger.info("Default tenant already exists.")
             return

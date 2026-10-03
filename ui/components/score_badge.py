@@ -13,9 +13,5 @@ def render_score_badge(score: float, level: str) -> None:
     label = LEVEL_LABELS_EN.get(level, level)
 
     with ui.row().classes("items-center gap-2"):
-        ui.label(f"{score:.1f}").classes("text-2xl font-bold").style(
-            f"color: {color}"
-        )
-        ui.label(label).classes("rf-score-badge").style(
-            f"background-color: {color}"
-        )
+        ui.label(f"{score:.1f}").classes("text-2xl font-bold").style(f"color: {color}")
+        ui.label(label).classes("rf-score-badge").style(f"background-color: {color}")

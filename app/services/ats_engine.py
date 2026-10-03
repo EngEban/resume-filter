@@ -22,13 +22,14 @@ LEVELS = [
     (75, "good", "Good"),
     (60, "average", "Average"),
     (40, "below_average", "Below Average"),
-    (0,  "weak", "Weak"),
+    (0, "weak", "Weak"),
 ]
 
 
 @dataclass
 class ATSBreakdown:
     """Detailed per-factor scores (each 0-100)."""
+
     keyword_match: float = 0.0
     action_verbs: float = 0.0
     quantified_achievements: float = 0.0
@@ -40,6 +41,7 @@ class ATSBreakdown:
 @dataclass
 class ATSScore:
     """Final ATS score with breakdown and level."""
+
     total: float
     level: str
     level_label: str
@@ -121,10 +123,7 @@ def calculate_ats_score(
     )
 
     # Weighted total
-    total = sum(
-        getattr(breakdown, factor) * weight
-        for factor, weight in WEIGHTS.items()
-    )
+    total = sum(getattr(breakdown, factor) * weight for factor, weight in WEIGHTS.items())
     total = round(total, 2)
     level, label = _get_level(total)
 

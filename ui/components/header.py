@@ -10,9 +10,7 @@ from ui.state import SessionState
 
 def render_header(state: SessionState) -> None:
     """Render the top navigation bar."""
-    with ui.row().classes(
-        "w-full items-center justify-between rf-header"
-    ):
+    with ui.row().classes("w-full items-center justify-between rf-header"):
         # ---------- Brand ----------
         with ui.row().classes("items-center gap-2"):
             ui.link("📄 ResumeFilter", "/ui/dashboard").classes(
@@ -40,9 +38,7 @@ def render_header(state: SessionState) -> None:
 
 
 def _nav_link(label: str, target: str) -> None:
-    ui.link(label, target).classes(
-        "text-white text-sm no-underline hover:underline"
-    )
+    ui.link(label, target).classes("text-white text-sm no-underline hover:underline")
 
 
 def _sign_out(state: SessionState) -> None:

@@ -46,20 +46,12 @@ def render() -> None:
             with current_card:
                 ui.label("Current configuration").classes("font-semibold")
                 with ui.row().classes("items-center gap-3 flex-wrap"):
-                    ui.label(f"Provider: {info.get('provider', '—')}").classes(
-                        "text-sm"
-                    )
-                    ui.label(f"Model: {info.get('model', '—')}").classes(
-                        "text-sm"
-                    )
+                    ui.label(f"Provider: {info.get('provider', '—')}").classes("text-sm")
+                    ui.label(f"Model: {info.get('model', '—')}").classes("text-sm")
                     source = info.get("source")
-                    badge_text = (
-                        "Your Key" if source == "tenant" else "Platform Default"
-                    )
+                    badge_text = "Your Key" if source == "tenant" else "Platform Default"
                     badge_color = SUCCESS if source == "tenant" else PRIMARY
-                    ui.label(badge_text).classes(
-                        "px-2 py-0.5 rounded text-xs font-semibold"
-                    ).style(
+                    ui.label(badge_text).classes("px-2 py-0.5 rounded text-xs font-semibold").style(
                         f"background-color: {badge_color}15; color: {badge_color};"
                     )
 
@@ -97,9 +89,7 @@ def render() -> None:
 
                 model_select = (
                     ui.select(
-                        options=provider_map.get(provider_select.value, {}).get(
-                            "models", []
-                        ),
+                        options=provider_map.get(provider_select.value, {}).get("models", []),
                         label="Model",
                     )
                     .classes("w-full")
@@ -109,14 +99,10 @@ def render() -> None:
                 def on_provider_change() -> None:
                     meta = provider_map.get(provider_select.value, {})
                     model_select.options = meta.get("models", [])
-                    model_select.value = (
-                        meta["models"][0] if meta.get("models") else None
-                    )
+                    model_select.value = meta["models"][0] if meta.get("models") else None
                     model_select.update()
 
-                provider_select.on_value_change(
-                    lambda _: on_provider_change()
-                )
+                provider_select.on_value_change(lambda _: on_provider_change())
                 if providers:
                     on_provider_change()
 
@@ -156,9 +142,7 @@ def render() -> None:
                     if result.get("success"):
                         latency = result.get("latency_ms")
                         status.set_text(
-                            f"✅ Connection OK ({latency} ms)"
-                            if latency
-                            else "✅ Connection OK"
+                            f"✅ Connection OK ({latency} ms)" if latency else "✅ Connection OK"
                         )
                         status.style(f"color: {SUCCESS}")
                     else:

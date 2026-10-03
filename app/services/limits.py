@@ -32,14 +32,10 @@ async def check_b2c_daily_limit(
     count = result.scalar_one() or 0
 
     if count >= limit:
-        raise LimitExceededError(
-            f"Daily limit reached ({limit} analyses/day). Try again tomorrow."
-        )
+        raise LimitExceededError(f"Daily limit reached ({limit} analyses/day). Try again tomorrow.")
 
 
 def check_batch_size(size: int, max_size: int) -> None:
     """Ensure a batch does not exceed the maximum allowed size."""
     if size > max_size:
-        raise LimitExceededError(
-            f"Batch size {size} exceeds the maximum of {max_size}."
-        )
+        raise LimitExceededError(f"Batch size {size} exceeds the maximum of {max_size}.")

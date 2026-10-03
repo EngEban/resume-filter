@@ -8,17 +8,11 @@ from ui.theme import PRIMARY
 
 
 def render() -> None:
-    with ui.column().classes(
-        "w-full items-center justify-center min-h-screen gap-8 p-6"
-    ):
+    with ui.column().classes("w-full items-center justify-center min-h-screen gap-8 p-6"):
         # ---------- Hero ----------
         with ui.column().classes("items-center gap-3"):
-            ui.label("📄 ResumeFilter").classes("text-5xl font-bold").style(
-                f"color: {PRIMARY}"
-            )
-            ui.label(
-                "AI-powered resume screening and ATS scoring"
-            ).classes("text-lg rf-muted")
+            ui.label("📄 ResumeFilter").classes("text-5xl font-bold").style(f"color: {PRIMARY}")
+            ui.label("AI-powered resume screening and ATS scoring").classes("text-lg rf-muted")
 
         # ---------- Feature cards ----------
         with ui.row().classes("gap-6 mt-4 flex-wrap justify-center"):
@@ -46,9 +40,9 @@ def render() -> None:
         # ---------- Login link ----------
         with ui.row().classes("items-center gap-2 mt-6"):
             ui.label("Already have an account?").classes("rf-muted")
-            ui.link("Sign in", "/ui/login").classes(
-                "font-semibold no-underline"
-            ).style(f"color: {PRIMARY}")
+            ui.link("Sign in", "/ui/login").classes("font-semibold no-underline").style(
+                f"color: {PRIMARY}"
+            )
 
         # ---------- Footer ----------
         with ui.row().classes("items-center gap-4 mt-12"):

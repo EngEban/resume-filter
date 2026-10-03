@@ -26,32 +26,26 @@ def render(batch_id: str) -> None:
     with ui.column().classes("w-full max-w-7xl mx-auto p-6 gap-4"):
         with ui.row().classes("items-center justify-between w-full"):
             with ui.row().classes("items-center gap-2"):
-                ui.link(
-                    "← Back to batch", f"/ui/b2b/batches/{batch_id}"
-                ).classes("text-sm no-underline").style(f"color: {PRIMARY}")
+                ui.link("← Back to batch", f"/ui/b2b/batches/{batch_id}").classes(
+                    "text-sm no-underline"
+                ).style(f"color: {PRIMARY}")
                 ui.label("Compare Candidates").classes("text-2xl font-bold")
 
             async def dl_xlsx() -> None:
                 try:
                     data = await state.client.export_comparison_xlsx(batch_id)
-                    ui.download(
-                        data, filename=f"compare_{batch_id[:8]}.xlsx"
-                    )
+                    ui.download(data, filename=f"compare_{batch_id[:8]}.xlsx")
                 except APIError as exc:
                     ui.notify(exc.message, color="negative")
 
-            ui.button("📥 Export Excel", on_click=dl_xlsx).props(
-                "outline dense color=primary"
-            )
+            ui.button("📥 Export Excel", on_click=dl_xlsx).props("outline dense color=primary")
 
         container = ui.column().classes("w-full gap-4")
 
         async def load() -> None:
             container.clear()
             try:
-                data = await state.client.compare_candidates(
-                    batch_id, limit=10
-                )
+                data = await state.client.compare_candidates(batch_id, limit=10)
             except APIError as exc:
                 with container:
                     ui.label(exc.message).style(f"color: {DANGER}")
@@ -76,18 +70,12 @@ def _render(data: dict) -> None:
 
 def _candidate_card(rank: int, c: dict) -> None:
     score = c.get("ats_score") or 0
-    color = (
-        SUCCESS if score >= 75 else "#f59e0b" if score >= 60 else DANGER
-    )
+    color = SUCCESS if score >= 75 else "#f59e0b" if score >= 60 else DANGER
 
     with ui.card().classes("rf-card w-72 gap-2"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.label(f"#{rank}").classes("text-lg font-bold").style(
-                f"color: {PRIMARY}"
-            )
-            ui.label(f"{score:.1f}").classes("text-2xl font-bold").style(
-                f"color: {color}"
-            )
+            ui.label(f"#{rank}").classes("text-lg font-bold").style(f"color: {PRIMARY}")
+            ui.label(f"{score:.1f}").classes("text-2xl font-bold").style(f"color: {color}")
 
         ui.label(c.get("name", "—")).classes("font-semibold")
         if c.get("email"):
@@ -103,12 +91,8 @@ def _candidate_card(rank: int, c: dict) -> None:
             ui.label("Breakdown").classes("text-xs font-semibold")
             for factor, val in breakdown.items():
                 with ui.row().classes("items-center gap-2 w-full"):
-                    ui.label(
-                        factor.replace("_", " ").title()
-                    ).classes("text-xs flex-1")
-                    ui.label(f"{float(val):.0f}").classes(
-                        "text-xs rf-muted"
-                    )
+                    ui.label(factor.replace("_", " ").title()).classes("text-xs flex-1")
+                    ui.label(f"{float(val):.0f}").classes("text-xs rf-muted")
 
         # ---------- Missing ----------
         missing = c.get("missing_keywords") or []
@@ -116,8 +100,6 @@ def _candidate_card(rank: int, c: dict) -> None:
             ui.label("Missing").classes("text-xs font-semibold mt-1")
             with ui.row().classes("gap-1 flex-wrap"):
                 for kw in missing[:8]:
-                    ui.label(kw).classes(
-                        "px-1.5 py-0.5 rounded text-xs"
-                    ).style(
+                    ui.label(kw).classes("px-1.5 py-0.5 rounded text-xs").style(
                         f"background-color: {DANGER}15; color: {DANGER};"
                     )

@@ -133,9 +133,7 @@ async def get_batch(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Return a batch's status and progress."""
-    batch = (
-        await db.execute(select(Batch).where(Batch.id == batch_id))
-    ).scalar_one_or_none()
+    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
     return BatchRead.model_validate(batch)
@@ -199,19 +197,21 @@ async def export_batch_xlsx(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as an Excel workbook."""
-    batch = (
-        await db.execute(select(Batch).where(Batch.id == batch_id))
-    ).scalar_one_or_none()
+    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
 
     resumes = (
-        await db.execute(
-            select(Resume)
-            .where(Resume.batch_id == batch_id)
-            .order_by(Resume.ats_score.desc().nullslast())
+        (
+            await db.execute(
+                select(Resume)
+                .where(Resume.batch_id == batch_id)
+                .order_by(Resume.ats_score.desc().nullslast())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     batch_dict = {
         "id": str(batch.id),
@@ -240,10 +240,7 @@ async def export_batch_xlsx(
     filename = f"batch_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
+        media_type=("application/vnd.openxmlformats-officedocument." "spreadsheetml.sheet"),
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
@@ -258,19 +255,21 @@ async def export_batch_pdf(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as a PDF report."""
-    batch = (
-        await db.execute(select(Batch).where(Batch.id == batch_id))
-    ).scalar_one_or_none()
+    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
 
     resumes = (
-        await db.execute(
-            select(Resume)
-            .where(Resume.batch_id == batch_id)
-            .order_by(Resume.ats_score.desc().nullslast())
+        (
+            await db.execute(
+                select(Resume)
+                .where(Resume.batch_id == batch_id)
+                .order_by(Resume.ats_score.desc().nullslast())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     batch_dict = {
         "id": str(batch.id),
@@ -310,20 +309,22 @@ async def reprocess_batch(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Reprocess only the failed resumes in a batch."""
-    batch = (
-        await db.execute(select(Batch).where(Batch.id == batch_id))
-    ).scalar_one_or_none()
+    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
 
     failed_resumes = (
-        await db.execute(
-            select(Resume).where(
-                Resume.batch_id == batch_id,
-                Resume.status == "failed",
+        (
+            await db.execute(
+                select(Resume).where(
+                    Resume.batch_id == batch_id,
+                    Resume.status == "failed",
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     if not failed_resumes:
         raise HTTPException(

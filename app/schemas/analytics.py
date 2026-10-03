@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 class ScoreDistribution(BaseModel):
     """Count of resumes per ATS level."""
+
     excellent: int = 0
     good: int = 0
     average: int = 0
@@ -18,12 +19,14 @@ class ScoreDistribution(BaseModel):
 
 class KeywordFrequency(BaseModel):
     """A keyword and how often it appears as missing."""
+
     keyword: str
     count: int
 
 
 class BatchAnalytics(BaseModel):
     """Analytics summary for a single batch."""
+
     batch_id: str
     job_title: str
     status: str
@@ -46,6 +49,7 @@ class BatchAnalytics(BaseModel):
 
 class TenantOverview(BaseModel):
     """High-level analytics across all of a tenant's batches."""
+
     tenant_id: str
     total_batches: int
     total_resumes: int

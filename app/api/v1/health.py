@@ -77,8 +77,7 @@ def _check_llm_config() -> dict[str, Any]:
     from app.core.config import settings
 
     configured = bool(
-        settings.PLATFORM_LLM_API_KEY
-        and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
+        settings.PLATFORM_LLM_API_KEY and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
     )
     return {
         "status": "ok" if configured else "unconfigured",

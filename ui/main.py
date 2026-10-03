@@ -35,6 +35,7 @@ def register_ui(fastapi_app: FastAPI) -> None:
     Page paths here are relative to /ui. So @ui.page("/login")
     becomes /ui/login.
     """
+
     @nicegui_app.on_startup
     async def _setup_global_css() -> None:
         apply_global_css()
