@@ -82,3 +82,9 @@ k8s/secrets.yaml
 # ---------- Jupyter ----------
 .ipynb_checkpoints/
 
+# ---------- Test Artifacts ----------
+resume_test.docx
+test_key.py
+*.docx
+*.pdf
+!docs/**/*.pdf
