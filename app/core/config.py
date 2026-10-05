@@ -33,22 +33,13 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
     CELERY_CONCURRENCY: int = 4
 
-    # ---------- MinIO ----------
-    MINIO_ENDPOINT: str = "minio:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET: str = "resumes"
-    MINIO_SECURE: bool = False
-
-    # ---------- Platform Default LLM ----------
-    PLATFORM_LLM_PROVIDER: str = "groq"
-    PLATFORM_LLM_MODEL: str = "groq/llama-3.1-8b-instant"
-    PLATFORM_LLM_API_KEY: str = ""
-    PLATFORM_LLM_BASE_URL: str | None = None
-
-    # ---------- Ollama (local fallback) ----------
-    OLLAMA_URL: str = "http://ollama:11434"
-    OLLAMA_MODEL: str = "qwen2.5:7b"
+    # ---------- Object Storage (SeaweedFS, S3-compatible) ----------
+    S3_ENDPOINT: str = "seaweedfs:8333"
+    S3_ACCESS_KEY: str = "any-key"
+    S3_SECRET_KEY: str = "any-secret"
+    S3_BUCKET: str = "resumes"
+    S3_SECURE: bool = False
+    S3_REGION: str = "us-east-1"
 
     # ---------- Limits ----------
     B2C_DAILY_LIMIT: int = 3
@@ -62,6 +53,16 @@ class Settings(BaseSettings):
     RATE_LIMIT_B2C_ANALYZE: str = "5/minute"
     RATE_LIMIT_B2B_UPLOAD: str = "20/minute"
     RATE_LIMIT_DEFAULT: str = "120/minute"
+
+    # ---------- Platform Default LLM ----------
+    PLATFORM_LLM_PROVIDER: str = "groq"
+    PLATFORM_LLM_MODEL: str = "groq/llama-3.1-8b-instant"
+    PLATFORM_LLM_API_KEY: str = ""
+    PLATFORM_LLM_BASE_URL: str | None = None
+
+    # ---------- Ollama (local fallback) ----------
+    OLLAMA_URL: str = "http://ollama:11434"
+    OLLAMA_MODEL: str = "qwen2.5:7b"
 
     # ---------- CORS ----------
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"

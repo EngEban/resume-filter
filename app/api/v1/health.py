@@ -1,6 +1,6 @@
 # ============================================================
 # app/api/v1/health.py
-# Comprehensive health checks (DB, Redis, MinIO, LLM).
+# Comprehensive health checks (DB, Redis, Storage, LLM).
 # ============================================================
 import logging
 import time
@@ -56,20 +56,21 @@ async def _check_redis() -> dict[str, Any]:
             await client.aclose()
 
 
-def _check_minio() -> dict[str, Any]:
+def _check_storage() -> dict[str, Any]:
+    """Verify object storage (SeaweedFS) connectivity."""
     from app.services.storage import get_client
 
     started = time.perf_counter()
     try:
         client = get_client()
         # Listing buckets is cheap and confirms connectivity.
-        list(client.list_buckets())
+        client.list_buckets()
         return {
             "status": "ok",
             "latency_ms": round((time.perf_counter() - started) * 1000, 2),
         }
     except Exception as exc:
-        logger.warning("MinIO health check failed: %s", exc)
+        logger.warning("Storage health check failed: %s", exc)
         return {"status": "error", "error": str(exc)}
 
 
@@ -77,7 +78,8 @@ def _check_llm_config() -> dict[str, Any]:
     from app.core.config import settings
 
     configured = bool(
-        settings.PLATFORM_LLM_API_KEY and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
+        settings.PLATFORM_LLM_API_KEY
+        and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
     )
     return {
         "status": "ok" if configured else "unconfigured",
@@ -107,8 +109,13 @@ async def readiness() -> JSONResponse:
     }
     ok = all(c["status"] == "ok" for c in checks.values())
     return JSONResponse(
-        status_code=status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE,
-        content={"status": "ready" if ok else "not_ready", "checks": checks},
+        status_code=(
+            status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE
+        ),
+        content={
+            "status": "ready" if ok else "not_ready",
+            "checks": checks,
+        },
     )
 
 
@@ -117,17 +124,19 @@ async def readiness() -> JSONResponse:
 # ------------------------------------------------------------
 @router.get("/health/full", summary="Full health report")
 async def full_health() -> JSONResponse:
-    """Full diagnostic report: DB, Redis, MinIO, and LLM configuration."""
+    """Full diagnostic report: DB, Redis, Storage, and LLM configuration."""
     checks = {
         "database": await _check_database(),
         "redis": await _check_redis(),
-        "minio": _check_minio(),
+        "storage": _check_storage(),
         "llm": _check_llm_config(),
     }
-    critical = ("database", "redis", "minio")
+    critical = ("database", "redis", "storage")
     ok = all(checks[k]["status"] == "ok" for k in critical)
     return JSONResponse(
-        status_code=status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE,
+        status_code=(
+            status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE
+        ),
         content={
             "status": "healthy" if ok else "degraded",
             "checks": checks,

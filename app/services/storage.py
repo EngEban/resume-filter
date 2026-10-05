@@ -1,31 +1,40 @@
 # ============================================================
 # app/services/storage.py
-# MinIO / S3 storage helpers for resume files.
+# S3-compatible object storage (SeaweedFS).
 # ============================================================
 import io
 import logging
 from datetime import timedelta
 
-from minio import Minio
-from minio.error import S3Error
+import boto3
+from botocore.client import Config
+from botocore.exceptions import BotoCoreError, ClientError
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Singleton client
+_client = None
 
-_client: Minio | None = None
 
-
-def get_client() -> Minio:
-    """Return a singleton MinIO client."""
+def get_client():
+    """Return a singleton S3 client (SeaweedFS-compatible)."""
     global _client
     if _client is None:
-        _client = Minio(
-            endpoint=settings.MINIO_ENDPOINT,
-            access_key=settings.MINIO_ACCESS_KEY,
-            secret_key=settings.MINIO_SECRET_KEY,
-            secure=settings.MINIO_SECURE,
+        protocol = "https" if settings.S3_SECURE else "http"
+        endpoint_url = f"{protocol}://{settings.S3_ENDPOINT}"
+
+        _client = boto3.client(
+            "s3",
+            endpoint_url=endpoint_url,
+            aws_access_key_id=settings.S3_ACCESS_KEY,
+            aws_secret_access_key=settings.S3_SECRET_KEY,
+            region_name=settings.S3_REGION,
+            config=Config(
+                signature_version="s3v4",
+                s3={"addressing_style": "path"},
+            ),
         )
     return _client
 
@@ -33,66 +42,72 @@ def get_client() -> Minio:
 def ensure_bucket() -> None:
     """Create the default bucket if it does not exist."""
     client = get_client()
-    if not client.bucket_exists(settings.MINIO_BUCKET):
-        client.make_bucket(settings.MINIO_BUCKET)
-        logger.info("Created MinIO bucket: %s", settings.MINIO_BUCKET)
+    try:
+        client.head_bucket(Bucket=settings.S3_BUCKET)
+    except ClientError as exc:
+        error_code = exc.response.get("Error", {}).get("Code", "")
+        if error_code in ("404", "NoSuchBucket"):
+            client.create_bucket(Bucket=settings.S3_BUCKET)
+            logger.info("Created S3 bucket: %s", settings.S3_BUCKET)
+        else:
+            raise
 
 
 def upload_file(
-    object_name: str, data: bytes, content_type: str = "application/octet-stream"
+    object_name: str,
+    data: bytes,
+    content_type: str = "application/octet-stream",
 ) -> str:
     """
-    Upload bytes to MinIO and return the object path.
+    Upload bytes to storage and return the object path.
     """
     ensure_bucket()
     client = get_client()
     client.put_object(
-        bucket_name=settings.MINIO_BUCKET,
-        object_name=object_name,
-        data=io.BytesIO(data),
-        length=len(data),
-        content_type=content_type,
+        Bucket=settings.S3_BUCKET,
+        Key=object_name,
+        Body=io.BytesIO(data),
+        ContentType=content_type,
     )
-    return f"{settings.MINIO_BUCKET}/{object_name}"
+    return f"{settings.S3_BUCKET}/{object_name}"
 
 
 def download_file(object_name: str) -> bytes:
     """
-    Download an object's bytes. Accepts either a raw name or 'bucket/name'.
+    Download an object's bytes. Accepts either 'name' or 'bucket/name'.
     """
-    if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
+    if object_name.startswith(f"{settings.S3_BUCKET}/"):
+        object_name = object_name[len(settings.S3_BUCKET) + 1 :]
 
     client = get_client()
-    response = None
     try:
-        response = client.get_object(settings.MINIO_BUCKET, object_name)
-        return response.read()
-    except S3Error as exc:
+        response = client.get_object(
+            Bucket=settings.S3_BUCKET, Key=object_name
+        )
+        return response["Body"].read()
+    except (BotoCoreError, ClientError) as exc:
         logger.error("Failed to download %s: %s", object_name, exc)
         raise
-    finally:
-        if response is not None:
-            response.close()
-            response.release_conn()
 
 
 def delete_file(object_name: str) -> None:
-    """Delete an object from MinIO."""
-    if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
+    """Delete an object from storage."""
+    if object_name.startswith(f"{settings.S3_BUCKET}/"):
+        object_name = object_name[len(settings.S3_BUCKET) + 1 :]
     try:
-        get_client().remove_object(settings.MINIO_BUCKET, object_name)
-    except S3Error as exc:
+        get_client().delete_object(
+            Bucket=settings.S3_BUCKET, Key=object_name
+        )
+    except (BotoCoreError, ClientError) as exc:
         logger.warning("Failed to delete %s: %s", object_name, exc)
 
 
 def get_presigned_url(object_name: str, expires_minutes: int = 60) -> str:
     """Generate a temporary download URL."""
-    if object_name.startswith(f"{settings.MINIO_BUCKET}/"):
-        object_name = object_name[len(settings.MINIO_BUCKET) + 1 :]
-    return get_client().presigned_get_object(
-        settings.MINIO_BUCKET,
-        object_name,
-        expires=timedelta(minutes=expires_minutes),
+    if object_name.startswith(f"{settings.S3_BUCKET}/"):
+        object_name = object_name[len(settings.S3_BUCKET) + 1 :]
+    return get_client().generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.S3_BUCKET, "Key": object_name},
+        ExpiresIn=expires_minutes * 60,
     )
