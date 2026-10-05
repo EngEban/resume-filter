@@ -57,12 +57,15 @@ services:
     image: chrislusf/seaweedfs:latest
     container_name: rf_seaweedfs
     restart: unless-stopped
+    # The `server -s3` command starts an all-in-one SeaweedFS server with the S3 API enabled.
+    # The `-dir=/data` flag specifies the directory for data storage inside the container.
     command: server -s3 -dir=/data
     ports:
-      - "8333:8333"    # S3 API
+      - "8333:8333"    # S3 API port
     volumes:
       - seaweedfs_data:/data
     healthcheck:
+      # A simple check to see if the S3 API port is responding.
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8333"]
       interval: 10s
       timeout: 5s
