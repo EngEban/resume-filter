@@ -51,25 +51,19 @@ services:
       - rf_network
 
   # ============================================================
-  # SeaweedFS - Object Storage (S3-compatible, MinIO alternative)
+  # SeaweedFS - Object Storage (S3-compatible)
   # ============================================================
   seaweedfs:
     image: chrislusf/seaweedfs:latest
     container_name: rf_seaweedfs
     restart: unless-stopped
-    # The `server -s3` command starts an all-in-one SeaweedFS server with the S3 API enabled.
-    # The `-dir=/data` flag specifies the directory for data storage inside the container.
-    command: server -s3 -dir=/data
+    command: server -s3 -dir=/data -s3.port=8333
     ports:
-      - "8333:8333"    # S3 API port
+      - "8333:8333"    # S3 API
+      - "9333:9333"    # Master UI
+      - "8888:8888"    # Filer UI
     volumes:
       - seaweedfs_data:/data
-    healthcheck:
-      # A simple check to see if the S3 API port is responding.
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8333"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - rf_network
 
@@ -97,7 +91,7 @@ services:
       redis:
         condition: service_healthy
       seaweedfs:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - ../app:/app/app
       - ../ui:/app/ui

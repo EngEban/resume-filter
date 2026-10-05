@@ -14,7 +14,7 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
 
     render_header(state)
@@ -41,13 +41,13 @@ def _render_b2c_home() -> None:
                 "Paste your resume and a job description to get an "
                 "instant ATS score with suggestions."
             ),
-            target="/ui/b2c/analyze",
+            target="/b2c/analyze",
         )
         _action_card(
             icon="📜",
             title="History",
             description="View your past analyses and track your progress.",
-            target="/ui/b2c/history",
+            target="/b2c/history",
         )
 
 
@@ -59,13 +59,13 @@ def _render_b2b_home() -> None:
             icon="📦",
             title="Batches",
             description=("Upload resumes and screen them against a job description."),
-            target="/ui/b2b/batches",
+            target="/b2b/batches",
         )
         _action_card(
             icon="⚙️",
             title="AI Settings",
             description=("Connect your own AI provider (OpenAI, Anthropic, Gemini, ...)."),
-            target="/ui/b2b/settings",
+            target="/b2b/settings",
         )
 
 

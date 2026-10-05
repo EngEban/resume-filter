@@ -1,6 +1,6 @@
 # ============================================================
 # ui/pages/b2c_analyze.py
-# B2C: analyze a single resume against a job description.
+# B2C: upload a resume file and analyze it.
 # ============================================================
 from nicegui import app, ui
 
@@ -10,25 +10,6 @@ from ui.components.level_chart import render_level_chart
 from ui.components.score_badge import render_score_badge
 from ui.state import SessionState
 from ui.theme import DANGER, PRIMARY, SUCCESS
-
-SAMPLE_RESUME = """John Doe
-Senior Python Backend Developer
-Email: john@example.com | Phone: +970 599 123 456 | Gaza
-
-SUMMARY
-Backend engineer with 6 years of experience designing scalable APIs.
-
-EXPERIENCE
-- Built microservices with FastAPI handling 10M requests/day
-- Optimized PostgreSQL queries reducing latency by 60%
-- Led a team of 4 engineers, delivered 3 major releases
-
-EDUCATION
-BSc in Computer Science, Islamic University of Gaza
-
-SKILLS
-Python, FastAPI, PostgreSQL, Redis, Docker, Kubernetes, Celery
-"""
 
 SAMPLE_JOB = """We are hiring a Senior Python Backend Developer.
 
@@ -46,55 +27,80 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
     if state.account_type != "b2c":
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     render_header(state)
 
-    with ui.column().classes("w-full max-w-6xl mx-auto p-6 gap-6"):
+    # ---------- Uploaded file buffer ----------
+    uploaded: dict = {"name": None, "content": None}
+
+    with ui.column().classes("w-full max-w-5xl mx-auto p-6 gap-6"):
         ui.label("🎯 Analyze Your Resume").classes("text-2xl font-bold")
         ui.label(
-            "Paste your resume and the job description to receive "
-            "an ATS score with prioritized suggestions."
+            "Upload your resume (PDF or DOCX) and paste the job "
+            "description to receive an ATS score with suggestions."
         ).classes("rf-muted")
 
-        with ui.row().classes("w-full gap-4 flex-wrap"):
-            with ui.column().classes("flex-1 min-w-[380px] gap-2"):
-                with ui.row().classes("items-center justify-between w-full"):
-                    ui.label("Resume Text").classes("font-semibold")
-                    ui.button(
-                        "Load sample",
-                        on_click=lambda: resume_input.set_value(SAMPLE_RESUME),
-                    ).props("flat dense color=primary")
-                resume_input = ui.textarea().classes("w-full").props("outlined rows=18")
+        # ---------- Resume upload ----------
+        with ui.card().classes("rf-card w-full gap-3"):
+            ui.label("1. Your Resume").classes("font-semibold")
 
-            with ui.column().classes("flex-1 min-w-[380px] gap-2"):
-                with ui.row().classes("items-center justify-between w-full"):
-                    ui.label("Job Description").classes("font-semibold")
-                    ui.button(
-                        "Load sample",
-                        on_click=lambda: job_input.set_value(SAMPLE_JOB),
-                    ).props("flat dense color=primary")
-                job_input = ui.textarea().classes("w-full").props("outlined rows=18")
+            def handle_upload(e) -> None:
+                try:
+                    content = e.content.read()
+                    uploaded["name"] = e.name
+                    uploaded["content"] = content
+                    upload_status.set_text(
+                        f"✅ Uploaded: {e.name} " f"({len(content) / 1024:.1f} KB)"
+                    )
+                    upload_status.style(f"color: {SUCCESS}")
+                except Exception as ex:
+                    upload_status.set_text(f"❌ Upload failed: {ex}")
+                    upload_status.style(f"color: {DANGER}")
 
+            ui.upload(
+                label="Upload PDF or DOCX",
+                auto_upload=True,
+                on_upload=handle_upload,
+                max_file_size=10 * 1024 * 1024,
+                max_files=1,
+            ).classes("w-full").props("accept=.pdf,.docx")
+
+            upload_status = ui.label().classes("text-sm")
+
+            ui.label("Supported formats: PDF, DOCX. Max size: 10 MB.").classes("text-xs rf-muted")
+
+        # ---------- Job description ----------
+        with ui.card().classes("rf-card w-full gap-3"):
+            with ui.row().classes("items-center justify-between w-full"):
+                ui.label("2. Job Description").classes("font-semibold")
+                ui.button(
+                    "Load sample",
+                    on_click=lambda: job_input.set_value(SAMPLE_JOB),
+                ).props("flat dense color=primary")
+
+            job_input = ui.textarea().classes("w-full").props("outlined rows=10")
+
+        # ---------- Actions ----------
         with ui.row().classes("w-full items-center gap-4"):
-            analyze_btn = ui.button(
-                "Analyze",
-                on_click=lambda: _run_analyze(state, resume_input, job_input, status, results),
+            ui.button(
+                "Analyze Resume",
+                on_click=lambda: _run_analyze(state, uploaded, job_input, status, results),
             ).props("color=primary unelevated")
 
             status = ui.label().classes("text-sm")
 
+        # ---------- Results ----------
         results = ui.column().classes("w-full gap-6 mt-4")
-        analyze_btn.set_enabled(True)
 
 
 async def _run_analyze(
     state: SessionState,
-    resume_input,
+    uploaded: dict,
     job_input,
     status,
     results,
@@ -102,23 +108,31 @@ async def _run_analyze(
     status.set_text("")
     results.clear()
 
-    resume_text = (resume_input.value or "").strip()
-    job_text = (job_input.value or "").strip()
-
-    if len(resume_text) < 50:
-        status.set_text("Resume must be at least 50 characters.")
+    # ---------- Validate upload ----------
+    if not uploaded.get("content"):
+        status.set_text("Please upload a resume file (PDF or DOCX).")
         status.style(f"color: {DANGER}")
         return
+
+    file_name = uploaded["name"]
+    file_bytes = uploaded["content"]
+
+    # ---------- Validate job description ----------
+    job_text = (job_input.value or "").strip()
     if len(job_text) < 20:
         status.set_text("Job description must be at least 20 characters.")
         status.style(f"color: {DANGER}")
         return
 
-    status.set_text("⏳ Analyzing... This can take 5-15 seconds.")
+    status.set_text("⏳ Analyzing... This can take 5-20 seconds.")
     status.style(f"color: {PRIMARY}")
 
     try:
-        result = await state.client.analyze(resume_text, job_text)
+        result = await state.client.analyze(
+            file_content=file_bytes,
+            file_name=file_name,
+            job_description=job_text,
+        )
     except APIError as exc:
         status.set_text(exc.message)
         status.style(f"color: {DANGER}")
@@ -161,7 +175,6 @@ def _render_results(result: dict) -> None:
     if suggestions:
         with ui.card().classes("rf-card w-full gap-3"):
             ui.label("💡 Suggestions").classes("text-lg font-semibold")
-
             for s in suggestions:
                 _suggestion_row(s)
 

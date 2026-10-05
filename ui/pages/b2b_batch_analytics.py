@@ -16,17 +16,17 @@ def render(batch_id: str) -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
     if state.account_type != "b2b":
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     render_header(state)
 
     with ui.column().classes("w-full max-w-6xl mx-auto p-6 gap-6"):
         with ui.row().classes("items-center gap-2"):
-            ui.link("← Back to batch", f"/ui/b2b/batches/{batch_id}").classes(
+            ui.link("← Back to batch", f"/b2b/batches/{batch_id}").classes(
                 "text-sm no-underline"
             ).style(f"color: {PRIMARY}")
             ui.label("Analytics").classes("text-2xl font-bold")

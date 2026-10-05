@@ -4,7 +4,6 @@
 # ============================================================
 import io
 import logging
-from datetime import timedelta
 
 import boto3
 from botocore.client import Config
@@ -81,9 +80,7 @@ def download_file(object_name: str) -> bytes:
 
     client = get_client()
     try:
-        response = client.get_object(
-            Bucket=settings.S3_BUCKET, Key=object_name
-        )
+        response = client.get_object(Bucket=settings.S3_BUCKET, Key=object_name)
         return response["Body"].read()
     except (BotoCoreError, ClientError) as exc:
         logger.error("Failed to download %s: %s", object_name, exc)
@@ -95,9 +92,7 @@ def delete_file(object_name: str) -> None:
     if object_name.startswith(f"{settings.S3_BUCKET}/"):
         object_name = object_name[len(settings.S3_BUCKET) + 1 :]
     try:
-        get_client().delete_object(
-            Bucket=settings.S3_BUCKET, Key=object_name
-        )
+        get_client().delete_object(Bucket=settings.S3_BUCKET, Key=object_name)
     except (BotoCoreError, ClientError) as exc:
         logger.warning("Failed to delete %s: %s", object_name, exc)
 

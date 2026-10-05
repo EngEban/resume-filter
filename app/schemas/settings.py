@@ -17,9 +17,9 @@ SUPPORTED_PROVIDERS = [
 # Suggested models per provider (used by the UI dropdown).
 SUGGESTED_MODELS: dict[str, list[str]] = {
     "groq": [
-        "groq/llama-3.3-70b-versatile",
-        "groq/llama-3.1-8b-instant",
-        "groq/mixtral-8x7b-32768",
+        "groq/openai/gpt-oss-20b",
+        "groq/openai/gpt-oss-120b",
+        "groq/qwen/qwen3-32b",
     ],
     "openai": [
         "openai/gpt-4o",

@@ -16,10 +16,10 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
     if state.account_type != "b2c":
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     render_header(state)
@@ -43,7 +43,7 @@ def render() -> None:
                     ui.label("No analyses yet.").classes("rf-muted")
                     ui.button(
                         "Analyze your first resume",
-                        on_click=lambda: ui.navigate.to("/ui/b2c/analyze"),
+                        on_click=lambda: ui.navigate.to("/b2c/analyze"),
                     ).props("color=primary")
                     return
 

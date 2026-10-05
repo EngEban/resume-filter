@@ -23,7 +23,7 @@ def render() -> None:
                     "Score your resume against any job and get "
                     "actionable, prioritized suggestions."
                 ),
-                target="/ui/register?type=b2c",
+                target="/register?type=b2c",
                 cta="Get Started Free",
             )
             _feature_card(
@@ -33,14 +33,14 @@ def render() -> None:
                     "Screen hundreds of resumes in minutes. "
                     "Bring your own AI provider or use ours."
                 ),
-                target="/ui/register?type=b2b",
+                target="/register?type=b2b",
                 cta="Create Organization",
             )
 
         # ---------- Login link ----------
         with ui.row().classes("items-center gap-2 mt-6"):
             ui.label("Already have an account?").classes("rf-muted")
-            ui.link("Sign in", "/ui/login").classes("font-semibold no-underline").style(
+            ui.link("Sign in", "/login").classes("font-semibold no-underline").style(
                 f"color: {PRIMARY}"
             )
 

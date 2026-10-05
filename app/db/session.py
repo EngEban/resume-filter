@@ -35,7 +35,7 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-# ---------- Context Manager (مع RLS) ----------
+# ---------- Context Manager (with RLS) ----------
 @asynccontextmanager
 async def get_session(
     tenant_id: UUID | str | None = None,
@@ -43,19 +43,20 @@ async def get_session(
     """
     Database session with optional Row-Level Security.
 
-    When tenant_id is provided, SET LOCAL is applied at the
-    start of the transaction, so every query within this
+    When tenant_id is provided, `set_config('app.current_tenant', tid, true)`
+    is applied at the start of the transaction, so every query within this
     session is automatically scoped to that tenant.
     """
     async with AsyncSessionLocal() as session:
         try:
-            # Start the transaction explicitly so SET LOCAL persists
-            # for the entire session, not just the first statement.
             await session.begin()
 
             if tenant_id:
+                # Note: SET LOCAL does not support parameter binding ($1).
+                # We use set_config() which is parameterizable and safe.
+                # The third argument `true` makes it transaction-local.
                 await session.execute(
-                    text("SET LOCAL app.current_tenant = :tid"),
+                    text("SELECT set_config('app.current_tenant', :tid, true)"),
                     {"tid": str(tenant_id)},
                 )
 
@@ -66,5 +67,22 @@ async def get_session(
             await session.rollback()
             raise
 
+        finally:
+            await session.close()
+
+
+# ---------- FastAPI Dependency (no RLS) ----------
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Simple dependency for endpoints that don't need RLS
+    (auth, B2C, public endpoints).
+    """
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
         finally:
             await session.close()

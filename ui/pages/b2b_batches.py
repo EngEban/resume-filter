@@ -17,10 +17,10 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
     if state.account_type != "b2b":
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     render_header(state)
@@ -94,7 +94,7 @@ def _batch_row(b: dict) -> None:
         .classes("rf-card w-full cursor-pointer")
         .on(
             "click",
-            lambda: ui.navigate.to(f"/ui/b2b/batches/{b['id']}"),
+            lambda: ui.navigate.to(f"/b2b/batches/{b['id']}"),
         ),
         ui.row().classes("items-center justify-between w-full"),
     ):
@@ -182,7 +182,7 @@ def _open_new_batch_dialog(state: SessionState, on_success) -> None:
             batch_id = result.get("id")
             dialog.close()
             ui.notify(f"Batch created: {batch_id[:8]}…", color="positive")
-            ui.navigate.to(f"/ui/b2b/batches/{batch_id}")
+            ui.navigate.to(f"/b2b/batches/{batch_id}")
 
         with ui.row().classes("w-full justify-end gap-2 mt-2"):
             ui.button("Cancel", on_click=dialog.close).props("flat")

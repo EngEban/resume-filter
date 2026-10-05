@@ -18,7 +18,7 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if state.is_authenticated:
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     is_b2b_default = "b2b" in ui.context.client.page.path
@@ -106,7 +106,7 @@ def render() -> None:
                 return
 
             state.set_authenticated(result["access_token"], me)
-            ui.navigate.to("/ui/dashboard")
+            ui.navigate.to("/dashboard")
 
         ui.button("Create account", on_click=do_register).props("color=primary unelevated").classes(
             "w-full"
@@ -114,6 +114,6 @@ def render() -> None:
 
         with ui.row().classes("items-center justify-center w-full gap-2"):
             ui.label("Already registered?").classes("rf-muted text-sm")
-            ui.link("Sign in", "/ui/login").classes("text-sm font-semibold no-underline").style(
+            ui.link("Sign in", "/login").classes("text-sm font-semibold no-underline").style(
                 f"color: {PRIMARY}"
             )

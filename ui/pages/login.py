@@ -14,7 +14,7 @@ def render() -> None:
     app.storage.user["state"] = state
 
     if state.is_authenticated:
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     with (
@@ -52,7 +52,7 @@ def render() -> None:
                 return
 
             state.set_authenticated(result["access_token"], me)
-            ui.navigate.to("/ui/dashboard")
+            ui.navigate.to("/dashboard")
 
         ui.button("Sign in", on_click=do_login).props("color=primary unelevated").classes("w-full")
 
@@ -60,7 +60,7 @@ def render() -> None:
 
         with ui.row().classes("items-center justify-center w-full gap-2"):
             ui.label("New here?").classes("rf-muted text-sm")
-            ui.link("Create account", "/ui/register").classes(
+            ui.link("Create account", "/register").classes(
                 "text-sm font-semibold no-underline"
             ).style(f"color: {PRIMARY}")
 

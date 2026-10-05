@@ -78,8 +78,7 @@ def _check_llm_config() -> dict[str, Any]:
     from app.core.config import settings
 
     configured = bool(
-        settings.PLATFORM_LLM_API_KEY
-        and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
+        settings.PLATFORM_LLM_API_KEY and settings.PLATFORM_LLM_API_KEY != "your-groq-api-key-here"
     )
     return {
         "status": "ok" if configured else "unconfigured",
@@ -109,9 +108,7 @@ async def readiness() -> JSONResponse:
     }
     ok = all(c["status"] == "ok" for c in checks.values())
     return JSONResponse(
-        status_code=(
-            status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE
-        ),
+        status_code=(status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE),
         content={
             "status": "ready" if ok else "not_ready",
             "checks": checks,
@@ -134,9 +131,7 @@ async def full_health() -> JSONResponse:
     critical = ("database", "redis", "storage")
     ok = all(checks[k]["status"] == "ok" for k in critical)
     return JSONResponse(
-        status_code=(
-            status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE
-        ),
+        status_code=(status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE),
         content={
             "status": "healthy" if ok else "degraded",
             "checks": checks,

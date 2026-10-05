@@ -18,17 +18,17 @@ def render(batch_id: str) -> None:
     app.storage.user["state"] = state
 
     if not state.is_authenticated:
-        ui.navigate.to("/ui/login")
+        ui.navigate.to("/login")
         return
     if state.account_type != "b2b":
-        ui.navigate.to("/ui/dashboard")
+        ui.navigate.to("/dashboard")
         return
 
     render_header(state)
 
     with ui.column().classes("w-full max-w-6xl mx-auto p-6 gap-4"):
         with ui.row().classes("items-center gap-2"):
-            ui.link("← Back to batches", "/ui/b2b/batches").classes("text-sm no-underline").style(
+            ui.link("← Back to batches", "/b2b/batches").classes("text-sm no-underline").style(
                 f"color: {PRIMARY}"
             )
             ui.label(f"Batch: {batch_id[:8]}…").classes("text-xl font-bold")
@@ -122,7 +122,7 @@ def render(batch_id: str) -> None:
 
                 table.on(
                     "rowClick",
-                    lambda e: ui.navigate.to(f"/ui/b2b/resumes/{e.args[1]['id']}"),
+                    lambda e: ui.navigate.to(f"/b2b/resumes/{e.args[1]['id']}"),
                 )
 
     ui.timer(0.1, refresh, once=True)

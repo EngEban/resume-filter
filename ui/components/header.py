@@ -13,18 +13,18 @@ def render_header(state: SessionState) -> None:
     with ui.row().classes("w-full items-center justify-between rf-header"):
         # ---------- Brand ----------
         with ui.row().classes("items-center gap-2"):
-            ui.link("📄 ResumeFilter", "/ui/dashboard").classes(
+            ui.link("📄 ResumeFilter", "/dashboard").classes(
                 "text-white text-lg font-bold no-underline"
             )
 
         # ---------- Center links ----------
         with ui.row().classes("items-center gap-6"):
             if state.account_type == "b2c":
-                _nav_link("Analyze", "/ui/b2c/analyze")
-                _nav_link("History", "/ui/b2c/history")
+                _nav_link("Analyze", "/b2c/analyze")
+                _nav_link("History", "/b2c/history")
             elif state.account_type == "b2b":
-                _nav_link("Batches", "/ui/b2b/batches")
-                _nav_link("Settings", "/ui/b2b/settings")
+                _nav_link("Batches", "/b2b/batches")
+                _nav_link("Settings", "/b2b/settings")
 
         # ---------- User menu ----------
         with ui.row().classes("items-center gap-3"):
@@ -44,4 +44,4 @@ def _nav_link(label: str, target: str) -> None:
 def _sign_out(state: SessionState) -> None:
     state.clear()
     app.storage.user.pop("state", None)
-    ui.navigate.to("/ui")
+    ui.navigate.to("/")

@@ -140,15 +140,22 @@ class APIClient:
     async def me(self) -> dict:
         return await self._request("GET", "/auth/me")
 
-    # ---------- b2c ----------
-    async def analyze(self, resume_text: str, job_description: str) -> dict:
+        # ---------- b2c ----------
+
+    async def analyze(
+        self,
+        file_content: bytes,
+        file_name: str,
+        job_description: str,
+    ) -> dict:
+        """Upload a resume file (PDF/DOCX) for analysis."""
+        files = [("file", (file_name, file_content, "application/octet-stream"))]
+        data = {"job_description": job_description}
         return await self._request(
             "POST",
             "/b2c/analyze",
-            json={
-                "resume_text": resume_text,
-                "job_description": job_description,
-            },
+            data=data,
+            files=files,
         )
 
     async def b2c_history(self, limit: int = 20) -> list:
