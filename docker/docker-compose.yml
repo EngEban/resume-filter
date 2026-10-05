@@ -51,23 +51,19 @@ services:
       - rf_network
 
   # ============================================================
-  # MinIO - Object Storage
+  # SeaweedFS - Object Storage (S3-compatible, MinIO alternative)
   # ============================================================
-  minio:
-    image: minio/minio:latest
-    container_name: rf_minio
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: rf_seaweedfs
     restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server -s3 -dir=/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "8333:8333"    # S3 API
     volumes:
-      - minio_data:/data
+      - seaweedfs_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8333"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,7 +93,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
+      seaweedfs:
         condition: service_healthy
     volumes:
       - ../app:/app/app
@@ -165,8 +161,8 @@ volumes:
     name: rf_postgres_data
   redis_data:
     name: rf_redis_data
-  minio_data:
-    name: rf_minio_data
+  seaweedfs_data:
+    name: rf_seaweedfs_data
 
 
 # ============================================================
