@@ -194,8 +194,13 @@ def test_retry_exhaustion_returns_terminal_failure(monkeypatch):
     monkeypatch.setattr(resume_task, "_process_resume_async", fail_processing)
     monkeypatch.setattr(resume_task, "Session", lambda _engine: FakeSession())
 
-    with resume_task.process_resume.push_request(retries=resume_task.process_resume.max_retries):
+    resume_task.process_resume.push_request(
+        retries=resume_task.process_resume.max_retries
+    )
+    try:
         result = resume_task.process_resume.run("batch", str(uuid4()), "resumes/file", "file.pdf")
+    finally:
+        resume_task.process_resume.pop_request()
 
     assert result["status"] == "failed"
     assert result["error"] == "provider failed"
