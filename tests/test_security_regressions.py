@@ -116,7 +116,9 @@ async def test_batch_upload_rejects_invalid_file_and_cleans_previous_upload(monk
     invalid = UploadFile(filename="malicious.exe", file=BytesIO(b"exe"))
 
     with pytest.raises(HTTPException) as exc_info:
-        await batches_module.create_batch(user, db, "Engineer", "A job description", None, [valid, invalid])
+        await batches_module.create_batch(
+            user, db, "Engineer", "A job description", None, [valid, invalid]
+        )
 
     assert exc_info.value.status_code == 400
     assert uploaded
@@ -126,7 +128,9 @@ async def test_batch_upload_rejects_invalid_file_and_cleans_previous_upload(monk
 
 @pytest.mark.asyncio
 async def test_batch_upload_rejects_oversized_file(monkeypatch):
-    monkeypatch.setattr(batches_module, "upload_file", lambda **_kwargs: pytest.fail("must not upload"))
+    monkeypatch.setattr(
+        batches_module, "upload_file", lambda **_kwargs: pytest.fail("must not upload")
+    )
     user = SimpleNamespace(tenant_id=uuid4(), role="member")
     db = FakeDb()
     oversized = UploadFile(
@@ -135,7 +139,9 @@ async def test_batch_upload_rejects_oversized_file(monkeypatch):
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        await batches_module.create_batch(user, db, "Engineer", "A job description", None, [oversized])
+        await batches_module.create_batch(
+            user, db, "Engineer", "A job description", None, [oversized]
+        )
 
     assert exc_info.value.status_code == 413
 
