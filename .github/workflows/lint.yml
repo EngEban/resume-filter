@@ -42,4 +42,3 @@ jobs:
 
       - name: Run Mypy
         run: mypy app ui
-        continue-on-error: true

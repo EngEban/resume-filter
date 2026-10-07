@@ -18,13 +18,16 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-rf_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rf_pass}
       POSTGRES_DB: ${POSTGRES_DB:-rf_db}
+      APP_DB_USER: ${APP_DB_USER:-rf_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init-rls.sql:/docker-entrypoint-initdb.d/01-rls.sql:ro
+      - ./postgres/02-create-app-role.sh:/docker-entrypoint-initdb.d/02-create-app-role.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rf_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER:-rf_app} -d ${POSTGRES_DB:-rf_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -76,16 +79,18 @@ services:
       dockerfile: docker/Dockerfile.api
     container_name: rf_api
     restart: unless-stopped
-    command: >
-      sh -c "
-      python scripts/wait_for_db.py &&
-      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      "
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - "8000:8000"
     env_file:
       - ../.env
+    environment:
+      POSTGRES_USER: ${APP_DB_USER:-rf_app}
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
+      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -95,6 +100,29 @@ services:
     volumes:
       - ../app:/app/app
       - ../ui:/app/ui
+      - ../alembic:/app/alembic
+      - ../scripts:/app/scripts
+    networks:
+      - rf_network
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: rf_migrate
+    restart: "no"
+    command: ["sh", "-c", "python scripts/wait_for_db.py && alembic upgrade head"]
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rf_pass}
+      DATABASE_URL: postgresql+asyncpg://rf_user:rf_pass@postgres:5432/rf_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../app:/app/app
       - ../alembic:/app/alembic
       - ../scripts:/app/scripts
     networks:
@@ -116,7 +144,13 @@ services:
       "
     env_file:
       - ../.env
+    environment:
+      POSTGRES_USER: ${APP_DB_USER:-rf_app}
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
+      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -143,6 +177,10 @@ services:
       - "5555:5555"
     env_file:
       - ../.env
+    environment:
+      POSTGRES_USER: ${APP_DB_USER:-rf_app}
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
+      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
     depends_on:
       - redis
       - worker

@@ -10,50 +10,39 @@ metadata:
     app.kubernetes.io/name: resume-filter
     app.kubernetes.io/component: config
 data:
-  # ---------- Application ----------
   APP_NAME: "ResumeFilter"
   APP_ENV: "production"
   DEBUG: "false"
   LOG_LEVEL: "INFO"
   LOG_JSON: "true"
 
-  # ---------- Database ----------
   POSTGRES_USER: "rf_user"
   POSTGRES_DB: "rf_db"
   POSTGRES_HOST: "resume-filter-postgres"
   POSTGRES_PORT: "5432"
-  DATABASE_URL: "postgresql+asyncpg://rf_user:CHANGE_ME@resume-filter-postgres:5432/rf_db"
 
-  # ---------- Redis / Celery ----------
   REDIS_URL: "redis://resume-filter-redis:6379/0"
   CELERY_BROKER_URL: "redis://resume-filter-redis:6379/1"
   CELERY_RESULT_BACKEND: "redis://resume-filter-redis:6379/2"
   CELERY_CONCURRENCY: "4"
 
-  # ---------- MinIO / S3 ----------
-  MINIO_ENDPOINT: "resume-filter-minio:9000"
-  MINIO_BUCKET: "resumes"
-  MINIO_SECURE: "false"
+  S3_ENDPOINT: "resume-filter-minio:9000"
+  S3_BUCKET: "resumes"
+  S3_SECURE: "false"
 
-  # ---------- Platform Default LLM ----------
   PLATFORM_LLM_PROVIDER: "groq"
   PLATFORM_LLM_MODEL: "groq/llama-3.1-8b-instant"
 
-  # ---------- Limits ----------
   B2C_DAILY_LIMIT: "3"
   B2C_PLATFORM_MONTHLY_LIMIT: "50"
   B2B_MAX_BATCH_SIZE: "500"
   B2B_MAX_FILE_SIZE_MB: "10"
 
-  # ---------- Rate Limiting ----------
   RATE_LIMIT_ENABLED: "true"
   RATE_LIMIT_AUTH: "10/minute"
   RATE_LIMIT_B2C_ANALYZE: "5/minute"
   RATE_LIMIT_B2B_UPLOAD: "20/minute"
   RATE_LIMIT_DEFAULT: "120/minute"
 
-  # ---------- CORS ----------
   CORS_ORIGINS: "https://resume-filter.example.com"
-
-  # ---------- Kubernetes discovery ----------
   K8S_NAMESPACE: "resume-filter"

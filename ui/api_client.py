@@ -66,6 +66,8 @@ class APIClient:
             raise APIError(0, "Network error. Please try again.") from exc
 
         if response.status_code >= 400:
+            if response.status_code == 401:
+                self.token = None
             try:
                 body = response.json()
                 message = body.get("message") or body.get("detail") or "Error"

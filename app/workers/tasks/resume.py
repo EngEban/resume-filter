@@ -133,5 +133,12 @@ def process_resume(
         except Exception:
             logger.exception("Failed to mark resume %s as failed", resume_id)
 
-        # Retry with exponential backoff
+        if self.request.retries >= self.max_retries:
+            return {
+                "resume_id": resume_id,
+                "status": "failed",
+                "error": str(exc)[:1000],
+            }
+
+        # Retry with exponential backoff while preserving a terminal result.
         raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1)) from exc

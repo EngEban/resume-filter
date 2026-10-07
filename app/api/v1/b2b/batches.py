@@ -3,6 +3,7 @@
 # B2B batch upload, status, export, and reprocessing endpoints.
 # ============================================================
 import logging
+import os
 import uuid
 from datetime import UTC, datetime
 from typing import Annotated, Literal
@@ -22,7 +23,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_current_b2b_user, get_tenant_db
+from app.core.dependencies import get_tenant_db, require_batch_operator
 from app.db.models.batch import Batch
 from app.db.models.resume import Resume
 from app.db.models.user import User
@@ -30,7 +31,7 @@ from app.schemas.batch import BatchRead, ResumeRead
 from app.services.excel_export import build_batch_workbook
 from app.services.limits import check_batch_size
 from app.services.pdf_export import build_batch_pdf
-from app.services.storage import upload_file
+from app.services.storage import delete_file, upload_file
 from app.workers.tasks.batch import process_batch
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ router = APIRouter(prefix="/b2b/batches", tags=["B2B - Batches"])
 # ============================================================
 @router.post("", response_model=BatchRead, status_code=status.HTTP_201_CREATED)
 async def create_batch(
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
     job_title: Annotated[str, Form()],
     job_description: Annotated[str, Form()],
@@ -56,7 +57,6 @@ async def create_batch(
 
     check_batch_size(len(files), settings.B2B_MAX_BATCH_SIZE)
     max_bytes = settings.B2B_MAX_FILE_SIZE_MB * 1024 * 1024
-
     batch = Batch(
         tenant_id=user.tenant_id,
         job_title=job_title,
@@ -67,32 +67,47 @@ async def create_batch(
     )
     db.add(batch)
     await db.flush()
+    uploaded_paths: list[str] = []
 
-    for file in files:
-        data = await file.read()
-        if len(data) > max_bytes:
-            raise HTTPException(
-                status_code=413,
-                detail=f"{file.filename} exceeds {settings.B2B_MAX_FILE_SIZE_MB} MB",
+    try:
+        for file in files:
+            if not file.filename:
+                raise HTTPException(status_code=400, detail="Every file must have a filename")
+            safe_filename = os.path.basename(file.filename.replace("\\", "/"))
+            if not safe_filename.lower().endswith((".pdf", ".docx")):
+                raise HTTPException(status_code=400, detail="Only PDF and DOCX files are supported")
+            data = await file.read()
+            if not data:
+                raise HTTPException(status_code=400, detail=f"{safe_filename} is empty")
+            if len(data) > max_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"{safe_filename} exceeds {settings.B2B_MAX_FILE_SIZE_MB} MB",
+                )
+            object_name = f"{user.tenant_id}/{batch.id}/{uuid.uuid4()}_{safe_filename}"
+            storage_path = upload_file(
+                object_name=object_name,
+                data=data,
+                content_type=file.content_type or "application/octet-stream",
             )
-        object_name = f"{user.tenant_id}/{batch.id}/{uuid.uuid4()}_{file.filename}"
-        storage_path = upload_file(
-            object_name=object_name,
-            data=data,
-            content_type=file.content_type or "application/octet-stream",
-        )
-        db.add(
-            Resume(
-                tenant_id=user.tenant_id,
-                batch_id=batch.id,
-                file_name=file.filename or "unknown",
-                storage_path=storage_path,
-                file_size=len(data),
-                status="pending",
+            uploaded_paths.append(storage_path)
+            db.add(
+                Resume(
+                    tenant_id=user.tenant_id,
+                    batch_id=batch.id,
+                    file_name=safe_filename,
+                    storage_path=storage_path,
+                    file_size=len(data),
+                    status="pending",
+                )
             )
-        )
+    except Exception:
+        for storage_path in uploaded_paths:
+            delete_file(storage_path)
+        raise
 
     await db.flush()
+    await db.commit()
     await db.refresh(batch)
     process_batch.delay(str(batch.id))
     return BatchRead.model_validate(batch)
@@ -103,7 +118,7 @@ async def create_batch(
 # ============================================================
 @router.get("", response_model=list[BatchRead])
 async def list_batches(
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
     status_filter: Annotated[str | None, Query(alias="status")] = None,
     search: Annotated[str | None, Query()] = None,
@@ -129,7 +144,7 @@ async def list_batches(
 @router.get("/{batch_id}", response_model=BatchRead)
 async def get_batch(
     batch_id: uuid.UUID,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Return a batch's status and progress."""
@@ -145,7 +160,7 @@ async def get_batch(
 @router.get("/{batch_id}/resumes", response_model=list[ResumeRead])
 async def list_batch_resumes(
     batch_id: uuid.UUID,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
     search: Annotated[str | None, Query()] = None,
     status_filter: Annotated[str | None, Query(alias="status")] = None,
@@ -193,7 +208,7 @@ async def list_batch_resumes(
 @router.get("/{batch_id}/export.xlsx")
 async def export_batch_xlsx(
     batch_id: uuid.UUID,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as an Excel workbook."""
@@ -251,7 +266,7 @@ async def export_batch_xlsx(
 @router.get("/{batch_id}/export.pdf")
 async def export_batch_pdf(
     batch_id: uuid.UUID,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as a PDF report."""
@@ -305,7 +320,7 @@ async def export_batch_pdf(
 @router.post("/{batch_id}/reprocess", response_model=BatchRead)
 async def reprocess_batch(
     batch_id: uuid.UUID,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_batch_operator)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Reprocess only the failed resumes in a batch."""
@@ -343,12 +358,12 @@ async def reprocess_batch(
     await db.flush()
     await db.refresh(batch)
 
-    from celery import group
+    from celery import chord
 
     from app.workers.tasks.batch import finalize_batch
     from app.workers.tasks.resume import process_resume
 
-    job = group(
+    header = [
         process_resume.s(
             batch_id=str(batch.id),
             resume_id=str(r.id),
@@ -356,9 +371,9 @@ async def reprocess_batch(
             file_name=r.file_name,
         )
         for r in failed_resumes
-    )
-    job.link(finalize_batch.s(batch_id=str(batch.id)))
-    job.apply_async()
+    ]
+    await db.commit()
+    chord(header)(finalize_batch.s(batch_id=str(batch.id)))
 
     logger.info(
         "Reprocessing %d failed resumes for batch %s",

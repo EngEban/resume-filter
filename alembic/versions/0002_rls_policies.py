@@ -46,22 +46,8 @@ def upgrade() -> None:
         """
     )
 
-    # -------- Bypass policy for admin role --------
-    # Grants the DB owner bypass so migrations and admin tools work.
-    for table in [*TENANT_SCOPED_TABLES, "analyses"]:
-        op.execute(
-            f"""
-            CREATE POLICY bypass_{table} ON {table}
-                TO CURRENT_USER
-                USING (true)
-                WITH CHECK (true);
-            """
-        )
-
-
 def downgrade() -> None:
     for table in [*TENANT_SCOPED_TABLES, "analyses"]:
-        op.execute(f"DROP POLICY IF EXISTS bypass_{table} ON {table};")
         op.execute(f"DROP POLICY IF EXISTS tenant_isolation_{table} ON {table};")
         op.execute(f"DROP POLICY IF EXISTS user_isolation_{table} ON {table};")
         op.execute(f"ALTER TABLE {table} DISABLE ROW LEVEL SECURITY;")

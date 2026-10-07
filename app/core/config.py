@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     # ---------- File Upload Limits ----------
     B2C_MAX_FILE_SIZE_MB: int = 10
+    B2C_DAILY_LIMIT: int = 3
     B2B_MAX_BATCH_SIZE: int = 500
     B2B_MAX_FILE_SIZE_MB: int = 10
 

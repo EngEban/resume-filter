@@ -27,7 +27,7 @@ router = APIRouter(prefix="/b2b/resumes", tags=["B2B - Results"])
 # ============================================================
 # Get single resume report
 # ============================================================
-@router.get("/{resume_id}")
+@router.get("/{resume_id:uuid}")
 async def get_resume_report(
     resume_id: uuid.UUID,
     user: Annotated[User, Depends(get_current_b2b_user)],
@@ -57,7 +57,7 @@ async def get_resume_report(
 # ============================================================
 # Export single resume report as PDF
 # ============================================================
-@router.get("/{resume_id}/report.pdf")
+@router.get("/{resume_id:uuid}/report.pdf")
 async def export_resume_pdf(
     resume_id: uuid.UUID,
     user: Annotated[User, Depends(get_current_b2b_user)],

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_current_b2b_user, get_tenant_db
+from app.core.dependencies import get_current_b2b_user, get_tenant_db, require_tenant_admin
 from app.core.security import encrypt_api_key
 from app.db.models.tenant import Tenant
 from app.db.models.user import User
@@ -61,7 +61,7 @@ async def get_llm_settings(
 @router.put("/llm", response_model=LLMSettingsRead)
 async def update_llm_settings(
     payload: LLMSettingsUpdate,
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_tenant_admin)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> LLMSettingsRead:
     """
@@ -109,7 +109,7 @@ async def update_llm_settings(
 # ------------------------------------------------------------
 @router.delete("/llm", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_llm_settings(
-    user: Annotated[User, Depends(get_current_b2b_user)],
+    user: Annotated[User, Depends(require_tenant_admin)],
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> None:
     """Remove the tenant's custom key and revert to the platform default."""

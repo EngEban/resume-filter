@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.db.models.tenant import Tenant
 from app.db.models.user import User
 from app.db.session import get_db, get_session
 
@@ -56,10 +57,32 @@ async def get_current_user(
 
 async def get_current_b2b_user(
     user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     """Ensure the user is a B2B user belonging to a tenant."""
     if user.account_type != "b2b" or user.tenant_id is None:
         raise HTTPException(status_code=403, detail="B2B account required")
+    tenant = await db.get(Tenant, user.tenant_id)
+    if tenant is None or not tenant.is_active:
+        raise HTTPException(status_code=403, detail="Organization is inactive")
+    return user
+
+
+async def require_tenant_admin(
+    user: Annotated[User, Depends(get_current_b2b_user)],
+) -> User:
+    """Require an owner or administrator for tenant-wide changes."""
+    if user.role not in {"owner", "admin"}:
+        raise HTTPException(status_code=403, detail="Tenant administrator required")
+    return user
+
+
+async def require_batch_operator(
+    user: Annotated[User, Depends(get_current_b2b_user)],
+) -> User:
+    """Require a member or administrator for batch operations."""
+    if user.role not in {"owner", "admin", "member"}:
+        raise HTTPException(status_code=403, detail="Batch operator required")
     return user
 
 
