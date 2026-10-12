@@ -61,6 +61,3 @@ cryptography==44.0.0
 tenacity==9.0.0
 python-slugify==8.0.4
 structlog==24.4.0
-
-# ---------- Web UI ----------
-nicegui==2.9.0

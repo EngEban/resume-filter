@@ -67,9 +67,6 @@ class Settings(BaseSettings):
     # ---------- CORS ----------
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
-    # ---------- UI ----------
-    UI_STORAGE_SECRET: str = "change-me-in-production"
-
     # ---------- Logging ----------
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False

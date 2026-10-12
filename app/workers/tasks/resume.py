@@ -23,6 +23,23 @@ def _sync_db_url() -> str:
 _sync_engine = create_engine(_sync_db_url(), pool_pre_ping=True)
 
 
+def _get_or_create_loop() -> asyncio.AbstractEventLoop:
+    """
+    Return the persistent event loop for this worker process.
+
+    Creates one if none exists or if the current one is closed.
+    """
+    try:
+        loop = asyncio.get_event_loop_policy().get_event_loop()
+        if loop.is_closed():
+            raise RuntimeError("Loop is closed")
+        return loop
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+
 async def _process_resume_async(
     resume_id: str,
     storage_path: str,
@@ -48,9 +65,13 @@ async def _process_resume_async(
             raise ValueError(f"Resume {resume_id} not found")
         batch = session.get(Batch, resume.batch_id)
         job_description = batch.job_description if batch else ""
-        tenant = session.get(Tenant, resume.tenant_id) if resume.tenant_id else None
+        tenant = (
+            session.get(Tenant, resume.tenant_id)
+            if resume.tenant_id
+            else None
+        )
 
-    # --- Download file from MinIO ---
+    # --- Download file from object storage ---
     file_bytes = download_file(storage_path)
 
     # --- Extract text ---
@@ -61,7 +82,7 @@ async def _process_resume_async(
     # --- Parse ---
     parsed = parse_resume_text(raw_text)
 
-    # --- LLM analysis (uses tenant's key if configured, else platform) ---
+    # --- LLM analysis ---
     provider = get_provider(tenant=tenant)
     llm_analysis, suggestions = await generate_suggestions(
         provider=provider,
@@ -113,14 +134,22 @@ def process_resume(
     storage_path: str,
     file_name: str,
 ) -> dict:
-    """Process a single resume inside the Celery worker."""
+    """
+    Process a single resume inside the Celery worker.
+
+    Uses a PERSISTENT event loop (not asyncio.run) to avoid
+    the "Event loop is closed" error from cached HTTP clients.
+    """
     try:
-        result = asyncio.run(_process_resume_async(resume_id, storage_path, file_name))
+        loop = _get_or_create_loop()
+        result = loop.run_until_complete(
+            _process_resume_async(resume_id, storage_path, file_name)
+        )
         return result
     except Exception as exc:
         logger.exception("process_resume failed for %s: %s", resume_id, exc)
 
-        # Mark as failed in DB
+        # Mark as failed in DB (best-effort)
         try:
             from app.db.models.resume import Resume
 
@@ -133,6 +162,7 @@ def process_resume(
         except Exception:
             logger.exception("Failed to mark resume %s as failed", resume_id)
 
+        # Terminal failure
         if self.request.retries >= self.max_retries:
             return {
                 "resume_id": resume_id,
@@ -140,5 +170,7 @@ def process_resume(
                 "error": str(exc)[:1000],
             }
 
-        # Retry with exponential backoff while preserving a terminal result.
-        raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1)) from exc
+        # Retry with exponential backoff
+        raise self.retry(
+            exc=exc, countdown=30 * (self.request.retries + 1)
+        ) from exc

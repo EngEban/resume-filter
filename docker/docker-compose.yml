@@ -71,7 +71,7 @@ services:
       - rf_network
 
   # ============================================================
-  # FastAPI + NiceGUI - Web Service
+  # FastAPI API Web Service
   # ============================================================
   api:
     build:
@@ -99,9 +99,25 @@ services:
         condition: service_started
     volumes:
       - ../app:/app/app
-      - ../ui:/app/ui
       - ../alembic:/app/alembic
       - ../scripts:/app/scripts
+    networks:
+      - rf_network
+
+  # React + Vite production frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ui
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    container_name: rf_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_started
     networks:
       - rf_network
 
@@ -157,7 +173,6 @@ services:
         condition: service_healthy
     volumes:
       - ../app:/app/app
-      - ../ui:/app/ui
       - ../scripts:/app/scripts
     networks:
       - rf_network

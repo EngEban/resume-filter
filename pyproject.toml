@@ -34,6 +34,7 @@ select = [
 ignore = [
     "E501",     # line too long (handled by line-length)
     "PLR0913",  # too many arguments
+    "SIM117",   # nested context managers used in service setup code
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -68,10 +69,6 @@ module = [
     "jose.*",
     "slugify.*",
 ]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "nicegui.*"
 ignore_missing_imports = true
 
 # ============================================================

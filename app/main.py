@@ -114,12 +114,6 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api/v1")
 
-    # ---------- UI (NiceGUI) ----------
-    if settings.APP_ENV != "test":
-        from ui.main import register_ui
-
-        register_ui(app)
-
     return app
 
 

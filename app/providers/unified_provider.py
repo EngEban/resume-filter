@@ -14,20 +14,20 @@ from app.providers.base import BaseLLMProvider, LLMResponse
 
 logger = logging.getLogger(__name__)
 
-# Suppress verbose LiteLLM logs unless debugging.
+# Suppress verbose LiteLLM logs.
 litellm.set_verbose = False
-litellm.drop_params = True  # Ignore unsupported params per provider
+litellm.suppress_debug_info = True
+litellm.drop_params = True
 
 
 @dataclass
 class ResolvedLLMConfig:
     """Resolved LLM configuration for a single request."""
-
     provider: str
-    model: str  # LiteLLM format: "provider/model"
+    model: str
     api_key: str
     base_url: str | None = None
-    source: str = "platform"  # "platform" or "tenant"
+    source: str = "platform"
 
 
 def resolve_llm_config(tenant=None) -> ResolvedLLMConfig:
@@ -37,15 +37,7 @@ def resolve_llm_config(tenant=None) -> ResolvedLLMConfig:
     Priority:
         1. Tenant's own key (BYOK)
         2. Platform default key
-
-    The model string must be in LiteLLM format:
-        "groq/llama-3.1-8b-instant"
-        "anthropic/claude-sonnet-4-20250514"
-        "openai/gpt-4o"
-        "gemini/gemini-1.5-pro"
-        "ollama/llama3.1:8b"
     """
-    # --- Tenant's own key ---
     if tenant and tenant.llm_api_key_encrypted:
         try:
             api_key = decrypt_api_key(tenant.llm_api_key_encrypted)
@@ -63,7 +55,6 @@ def resolve_llm_config(tenant=None) -> ResolvedLLMConfig:
                 exc,
             )
 
-    # --- Platform default ---
     return ResolvedLLMConfig(
         provider=settings.PLATFORM_LLM_PROVIDER,
         model=settings.PLATFORM_LLM_MODEL,
@@ -78,8 +69,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
     LLM provider backed by LiteLLM.
 
     LiteLLM translates a single OpenAI-compatible interface into
-    calls to 100+ providers (Groq, OpenAI, Anthropic, Gemini,
-    Azure, Bedrock, Ollama, ...).
+    calls to 100+ providers (Groq, OpenAI, Anthropic, Gemini, ...).
     """
 
     def __init__(self, config: ResolvedLLMConfig) -> None:
@@ -112,7 +102,6 @@ class UnifiedLLMProvider(BaseLLMProvider):
             "num_retries": 2,
         }
 
-        # Ollama uses api_base instead of an API key.
         if self.config.provider == "ollama":
             kwargs["api_base"] = self.config.base_url or settings.OLLAMA_URL
         else:
@@ -138,7 +127,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
         )
 
     async def health_check(self) -> bool:
-        """Verify the credentials and model are usable."""
+        """Verify credentials and model are usable."""
         try:
             await self.complete(
                 system_prompt="You are a health check.",

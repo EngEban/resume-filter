@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.venv
+__pycache__
+*.py[cod]
+*.log
+
+ui/node_modules
+ui/dist
+
+node_modules
+dist
