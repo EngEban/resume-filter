@@ -88,3 +88,8 @@ test_key.py
 *.docx
 *.pdf
 !docs/**/*.pdf
+# Ruff cache
+.ruff_cache/
+
+# Ruff cache
+.ruff_cache/
