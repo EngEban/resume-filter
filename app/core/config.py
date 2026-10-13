@@ -36,8 +36,8 @@ class Settings(BaseSettings):
 
     # ---------- Object Storage (SeaweedFS, S3-compatible) ----------
     S3_ENDPOINT: str = "seaweedfs:8333"
-    S3_ACCESS_KEY: str = "any-key"
-    S3_SECRET_KEY: str = "any-secret"
+    S3_ACCESS_KEY: str = ""
+    S3_SECRET_KEY: str = ""
     S3_BUCKET: str = "resumes"
     S3_SECURE: bool = False
     S3_REGION: str = "us-east-1"
@@ -57,7 +57,7 @@ class Settings(BaseSettings):
 
     # ---------- Platform Default LLM ----------
     PLATFORM_LLM_PROVIDER: str = "groq"
-    PLATFORM_LLM_MODEL: str = "groq/llama-3.1-8b-instant"
+    PLATFORM_LLM_MODEL: str = "groq/openai/gpt-oss-20b"
     PLATFORM_LLM_API_KEY: str = ""
     PLATFORM_LLM_BASE_URL: str | None = None
 

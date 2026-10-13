@@ -168,8 +168,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
         json_mode: bool = False,
         temperature: float = 0.2,
         max_tokens: int = 4096,
-        follow_redirects: bool | None = False,
-    ) -> LLMResponse:
+         ) -> LLMResponse:
         """Call the configured LLM via LiteLLM."""
         kwargs: dict = {
             "model": self.config.model,
@@ -192,8 +191,6 @@ class UnifiedLLMProvider(BaseLLMProvider):
 
         if json_mode:
             kwargs["response_format"] = {"type": "json_object"}
-        if follow_redirects is not None:
-            kwargs["follow_redirects"] = follow_redirects
 
         response = await litellm.acompletion(**kwargs)
 
