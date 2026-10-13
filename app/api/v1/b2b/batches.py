@@ -22,6 +22,7 @@ from fastapi.responses import Response
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.v1.b2b.authorization import get_tenant_batch
 from app.core.config import settings
 from app.core.dependencies import get_tenant_db, require_batch_operator
 from app.db.models.batch import Batch
@@ -109,7 +110,7 @@ async def create_batch(
     await db.flush()
     await db.commit()
     await db.refresh(batch)
-    process_batch.delay(str(batch.id))
+    process_batch.delay(str(batch.id), tenant_id=str(user.tenant_id))
     return BatchRead.model_validate(batch)
 
 
@@ -126,7 +127,7 @@ async def list_batches(
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[BatchRead]:
     """List batches for the tenant (paginated, filterable)."""
-    stmt = select(Batch)
+    stmt = select(Batch).where(Batch.tenant_id == user.tenant_id)
     if status_filter:
         stmt = stmt.where(Batch.status == status_filter)
     if search:
@@ -148,9 +149,7 @@ async def get_batch(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Return a batch's status and progress."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
     return BatchRead.model_validate(batch)
 
 
@@ -171,7 +170,11 @@ async def list_batch_resumes(
     ] = "score_desc",
 ) -> list[ResumeRead]:
     """List resumes in a batch with filtering and sorting."""
-    stmt = select(Resume).where(Resume.batch_id == batch_id)
+    await get_tenant_batch(db, user.tenant_id, batch_id)
+    stmt = select(Resume).where(
+        Resume.batch_id == batch_id,
+        Resume.tenant_id == user.tenant_id,
+    )
 
     if status_filter:
         stmt = stmt.where(Resume.status == status_filter)
@@ -212,15 +215,16 @@ async def export_batch_xlsx(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as an Excel workbook."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
 
     resumes = (
         (
             await db.execute(
                 select(Resume)
-                .where(Resume.batch_id == batch_id)
+                .where(
+                    Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
+                )
                 .order_by(Resume.ats_score.desc().nullslast())
             )
         )
@@ -270,15 +274,16 @@ async def export_batch_pdf(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a batch's results as a PDF report."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
 
     resumes = (
         (
             await db.execute(
                 select(Resume)
-                .where(Resume.batch_id == batch_id)
+                .where(
+                    Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
+                )
                 .order_by(Resume.ats_score.desc().nullslast())
             )
         )
@@ -324,15 +329,14 @@ async def reprocess_batch(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchRead:
     """Reprocess only the failed resumes in a batch."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
 
     failed_resumes = (
         (
             await db.execute(
                 select(Resume).where(
                     Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
                     Resume.status == "failed",
                 )
             )
@@ -369,11 +373,17 @@ async def reprocess_batch(
             resume_id=str(r.id),
             storage_path=r.storage_path,
             file_name=r.file_name,
+            tenant_id=str(user.tenant_id),
         )
         for r in failed_resumes
     ]
     await db.commit()
-    chord(header)(finalize_batch.s(batch_id=str(batch.id)))
+    chord(header)(
+        finalize_batch.s(
+            batch_id=str(batch.id),
+            tenant_id=str(user.tenant_id),
+        )
+    )
 
     logger.info(
         "Reprocessing %d failed resumes for batch %s",

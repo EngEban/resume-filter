@@ -7,10 +7,11 @@ import uuid
 from collections import Counter
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.v1.b2b.authorization import get_tenant_batch
 from app.core.dependencies import get_current_b2b_user, get_tenant_db
 from app.db.models.batch import Batch
 from app.db.models.resume import Resume
@@ -64,11 +65,20 @@ async def batch_analytics(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> BatchAnalytics:
     """Return analytics for a single batch."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
 
-    resumes = (await db.execute(select(Resume).where(Resume.batch_id == batch_id))).scalars().all()
+    resumes = (
+        (
+            await db.execute(
+                select(Resume).where(
+                    Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     scores = [r.ats_score for r in resumes if r.ats_score is not None]
     pending = sum(1 for r in resumes if r.status in ("pending", "processing"))
@@ -111,7 +121,14 @@ async def tenant_overview(
 ) -> TenantOverview:
     """Aggregate analytics across all batches for this tenant."""
     batches = (
-        (await db.execute(select(Batch).order_by(Batch.created_at.desc()).limit(100)))
+        (
+            await db.execute(
+                select(Batch)
+                .where(Batch.tenant_id == user.tenant_id)
+                .order_by(Batch.created_at.desc())
+                .limit(100)
+            )
+        )
         .scalars()
         .all()
     )
@@ -131,7 +148,16 @@ async def tenant_overview(
 
     batch_ids = [b.id for b in batches]
     resumes = (
-        (await db.execute(select(Resume).where(Resume.batch_id.in_(batch_ids)))).scalars().all()
+        (
+            await db.execute(
+                select(Resume).where(
+                    Resume.batch_id.in_(batch_ids),
+                    Resume.tenant_id == user.tenant_id,
+                )
+            )
+        )
+        .scalars()
+        .all()
     )
 
     scores = [r.ats_score for r in resumes if r.ats_score is not None]

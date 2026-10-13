@@ -2,7 +2,7 @@
 # app/schemas/settings.py
 # Pydantic schemas for tenant LLM settings.
 # ============================================================
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 
 SUPPORTED_PROVIDERS = [
     "groq",
@@ -51,16 +51,13 @@ SUGGESTED_MODELS: dict[str, list[str]] = {
 
 
 class LLMSettingsUpdate(BaseModel):
-    """Payload for updating a tenant's LLM configuration."""
+    """Deprecated BYOK payload; retained only for import compatibility."""
 
-    provider: str = Field(..., pattern="^[a-z_]+$")
-    model: str = Field(..., min_length=3, max_length=150)
-    api_key: str | None = Field(default=None, max_length=500)
-    base_url: str | None = Field(default=None, max_length=255)
+    model_config = ConfigDict(extra="forbid")
 
 
 class LLMSettingsRead(BaseModel):
-    """Current tenant LLM settings (never exposes the key)."""
+    """Safe view of the platform-managed LLM settings (never exposes the key)."""
 
     provider: str
     model: str

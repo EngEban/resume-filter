@@ -12,12 +12,12 @@ from app.providers.unified_provider import (
 
 def get_provider(tenant=None) -> BaseLLMProvider:
     """
-    Return an LLM provider for the given tenant.
+    Return the platform-managed LLM provider.
 
-    If the tenant has configured its own key (BYOK), it is used.
-    Otherwise, the platform-wide default is used.
+    ``tenant`` is retained for compatibility with worker and request call
+    sites, but it is not used to select credentials or a network endpoint.
     """
-    config = resolve_llm_config(tenant)
+    config = resolve_llm_config()
     return UnifiedLLMProvider(config)
 
 

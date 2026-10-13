@@ -12,8 +12,8 @@ from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.v1.b2b.authorization import get_tenant_batch, get_tenant_resume
 from app.core.dependencies import get_current_b2b_user, get_tenant_db
-from app.db.models.batch import Batch
 from app.db.models.resume import Resume
 from app.db.models.user import User
 from app.services.excel_export import build_comparison_workbook
@@ -34,9 +34,7 @@ async def get_resume_report(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> dict:
     """Return a detailed report for a single resume."""
-    resume = (await db.execute(select(Resume).where(Resume.id == resume_id))).scalar_one_or_none()
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    resume = await get_tenant_resume(db, user.tenant_id, resume_id)
 
     return {
         "id": str(resume.id),
@@ -64,9 +62,7 @@ async def export_resume_pdf(
     db: Annotated[AsyncSession, Depends(get_tenant_db)],
 ) -> Response:
     """Export a single candidate's report as a PDF."""
-    resume = (await db.execute(select(Resume).where(Resume.id == resume_id))).scalar_one_or_none()
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    resume = await get_tenant_resume(db, user.tenant_id, resume_id)
 
     report = {
         "candidate_name": resume.candidate_name,
@@ -99,11 +95,15 @@ async def compare_candidates(
     limit: Annotated[int, Query(ge=2, le=20)] = 5,
 ) -> dict:
     """Return the top-N candidates of a batch, side by side."""
+    await get_tenant_batch(db, user.tenant_id, batch_id)
     resumes = (
         (
             await db.execute(
                 select(Resume)
-                .where(Resume.batch_id == batch_id)
+                .where(
+                    Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
+                )
                 .order_by(Resume.ats_score.desc().nullslast())
                 .limit(limit)
             )
@@ -145,15 +145,16 @@ async def export_comparison_xlsx(
     limit: Annotated[int, Query(ge=2, le=20)] = 10,
 ) -> Response:
     """Export a candidate comparison as an Excel workbook."""
-    batch = (await db.execute(select(Batch).where(Batch.id == batch_id))).scalar_one_or_none()
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
 
     resumes = (
         (
             await db.execute(
                 select(Resume)
-                .where(Resume.batch_id == batch_id)
+                .where(
+                    Resume.batch_id == batch_id,
+                    Resume.tenant_id == user.tenant_id,
+                )
                 .order_by(Resume.ats_score.desc().nullslast())
                 .limit(limit)
             )
