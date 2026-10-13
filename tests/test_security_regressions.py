@@ -7,7 +7,10 @@ import pytest
 from fastapi import HTTPException, UploadFile
 from jose import jwt
 
+from app.api.v1.b2b import analytics as analytics_module
 from app.api.v1.b2b import batches as batches_module
+from app.api.v1.b2b import results as results_module
+from app.api.v1.b2b.authorization import get_tenant_batch, get_tenant_resume
 from app.api.v1.b2b.results import router as results_router
 from app.core import dependencies
 from app.core.config import settings as app_settings
@@ -40,6 +43,20 @@ class FakeDb:
 
     async def execute(self, _statement):
         return SimpleNamespace(scalar_one=lambda: self.scalar)
+
+
+class CapturingDb:
+    """Capture generated SQL while returning no cross-tenant rows."""
+
+    def __init__(self):
+        self.statement = None
+
+    async def execute(self, statement):
+        self.statement = statement
+        return SimpleNamespace(
+            scalar_one_or_none=lambda: None,
+            scalars=lambda: SimpleNamespace(all=lambda: []),
+        )
 
 
 @pytest.mark.asyncio
@@ -79,6 +96,101 @@ async def test_tenant_db_uses_authenticated_tenant_scope(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_batch_list_query_is_scoped_to_authenticated_tenant():
+    db = CapturingDb()
+    user = SimpleNamespace(tenant_id=uuid4(), role="member")
+
+    assert await batches_module.list_batches(user, db) == []
+    assert "batches.tenant_id" in str(db.statement)
+
+
+@pytest.mark.asyncio
+async def test_foreign_batch_is_rejected_by_ownership_helper():
+    db = CapturingDb()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_tenant_batch(db, uuid4(), uuid4())
+
+    assert exc_info.value.status_code == 404
+    statement = str(db.statement)
+    assert "batches.tenant_id" in statement
+    assert "batches.id" in statement
+
+
+@pytest.mark.asyncio
+async def test_foreign_resume_requires_owned_resume_and_batch():
+    db = CapturingDb()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_tenant_resume(db, uuid4(), uuid4())
+
+    assert exc_info.value.status_code == 404
+    statement = str(db.statement)
+    assert "resumes.tenant_id" in statement
+    assert "batches.tenant_id" in statement
+    assert "resumes.id" in statement
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        batches_module.get_batch,
+        batches_module.list_batch_resumes,
+        batches_module.export_batch_xlsx,
+        batches_module.export_batch_pdf,
+        batches_module.reprocess_batch,
+        analytics_module.batch_analytics,
+        results_module.compare_candidates,
+        results_module.export_comparison_xlsx,
+    ],
+)
+async def test_batch_scoped_endpoints_reject_a_foreign_batch(endpoint):
+    db = CapturingDb()
+    user = SimpleNamespace(tenant_id=uuid4(), role="member")
+    batch_id = uuid4()
+
+    with pytest.raises(HTTPException) as exc_info:
+        if endpoint in {
+            results_module.compare_candidates,
+            results_module.export_comparison_xlsx,
+        }:
+            await endpoint(user, db, batch_id)
+        else:
+            await endpoint(batch_id, user, db)
+
+    assert exc_info.value.status_code == 404
+    assert "batches.tenant_id" in str(db.statement)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "endpoint",
+    [results_module.get_resume_report, results_module.export_resume_pdf],
+)
+async def test_resume_scoped_endpoints_reject_a_foreign_resume(endpoint):
+    db = CapturingDb()
+    user = SimpleNamespace(tenant_id=uuid4(), role="member")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await endpoint(uuid4(), user, db)
+
+    assert exc_info.value.status_code == 404
+    assert "resumes.tenant_id" in str(db.statement)
+
+
+@pytest.mark.asyncio
+async def test_tenant_overview_query_is_scoped_to_authenticated_tenant():
+    db = CapturingDb()
+    user = SimpleNamespace(tenant_id=uuid4(), role="member")
+
+    overview = await analytics_module.tenant_overview(user, db)
+
+    assert overview.total_batches == 0
+    assert "batches.tenant_id" in str(db.statement)
+
+
+@pytest.mark.asyncio
 async def test_role_restricted_operations_reject_member():
     user = SimpleNamespace(role="member")
 
@@ -108,7 +220,11 @@ async def test_batch_upload_rejects_invalid_file_and_cleans_previous_upload(monk
 
     monkeypatch.setattr(batches_module, "upload_file", fake_upload_file)
     monkeypatch.setattr(batches_module, "delete_file", deleted.append)
-    monkeypatch.setattr(batches_module.process_batch, "delay", lambda _batch_id: None)
+    monkeypatch.setattr(
+        batches_module.process_batch,
+        "delay",
+        lambda _batch_id, **_kwargs: None,
+    )
 
     user = SimpleNamespace(tenant_id=uuid4(), role="member")
     db = FakeDb()

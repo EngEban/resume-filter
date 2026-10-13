@@ -9,5 +9,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- The application role must be subject to tenant RLS policies.
-ALTER ROLE rf_user NOSUPERUSER NOBYPASSRLS;
+-- Runtime role creation and hardening is handled by 02-create-app-role.sh.
+-- This file intentionally does not enable or alter RLS policies.
