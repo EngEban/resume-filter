@@ -60,6 +60,20 @@ export default function B2BBatchesPage() {
     void load();
     return () => { active = false; };
   }, [refreshKey, search, statusFilter]);
+  // Auto-refresh while any batch is still pending or processing.
+  useEffect(() => {
+    const hasActive = batches.some(
+      (b) => b.status === 'pending' || b.status === 'processing',
+    );
+    if (!hasActive) return;
+
+    const interval = setInterval(() => {
+      setRefreshKey((v) => v + 1);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [batches]);
+  
 
   const metrics = useMemo(
     () =>
