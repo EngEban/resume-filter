@@ -4,7 +4,8 @@
 # ============================================================
 from typing import Literal
 
-from pydantic import Field
+from cryptography.fernet import Fernet
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,16 +13,16 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # ---------- Application ----------
-    APP_NAME: str = "ResumeFilter"
+    APP_NAME: str = "Talentscope"
     APP_ENV: Literal["development", "staging", "production", "test"] = "development"
     DEBUG: bool = True
 
     SECRET_KEY: str = Field(..., min_length=32)
-    MASTER_KEY: str = Field(..., min_length=32)
+    MASTER_KEY: str = Field(..., min_length=44, max_length=44)
 
     # ---------- Database ----------
-    POSTGRES_USER: str = "rf_user"
-    POSTGRES_PASSWORD: str = "rf_pass"
+    POSTGRES_USER: str = "rf_app"
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "rf_db"
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
 
     # ---------- Platform Default LLM ----------
     PLATFORM_LLM_PROVIDER: str = "groq"
-    PLATFORM_LLM_MODEL: str = "groq/openai/gpt-oss-20b"
+    PLATFORM_LLM_MODEL: str = "groq/llama-3.1-8b-instant"
     PLATFORM_LLM_API_KEY: str = ""
     PLATFORM_LLM_BASE_URL: str | None = None
 
@@ -78,6 +79,21 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    # ---------- Validators ----------
+    @field_validator("MASTER_KEY")
+    @classmethod
+    def _validate_fernet_key(cls, v: str) -> str:
+        """Fernet keys must be a valid 44-char URL-safe base64 string."""
+        try:
+            Fernet(v.encode())
+        except Exception as exc:
+            raise ValueError(
+                "MASTER_KEY must be a valid Fernet key (44-char base64). "
+                "Generate one with: python scripts/generate_master_key.py"
+            ) from exc
+        return v
+
+    # ---------- Properties ----------
     @property
     def cors_origins_list(self) -> list[str]:
         """Convert CORS_ORIGINS to a list."""
