@@ -1,0 +1,106 @@
+# Creates and hardens database roles. Run this before the migration Job.
+# It does not change table ownership or enable/modify RLS.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: resume-filter-role-provision
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: database-role-provisioning
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: resume-filter
+        app.kubernetes.io/component: database-role-provisioning
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: role-provision
+          image: postgres:16-alpine
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_HOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_BOOTSTRAP_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: POSTGRES_BOOTSTRAP_PASSWORD
+            - name: RF_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: RF_APP_PASSWORD
+            - name: RF_WORKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: RF_WORKER_PASSWORD
+            - name: RF_MIGRATOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: RF_MIGRATOR_PASSWORD
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+              : "${RF_APP_PASSWORD:?RF_APP_PASSWORD is required}"
+              : "${RF_WORKER_PASSWORD:?RF_WORKER_PASSWORD is required}"
+              : "${RF_MIGRATOR_PASSWORD:?RF_MIGRATOR_PASSWORD is required}"
+              export PGPASSWORD="$POSTGRES_PASSWORD"
+              until pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"; do sleep 2; done
+              psql -v ON_ERROR_STOP=1 \
+                -v "rf_app_password=$RF_APP_PASSWORD" \
+                -v "rf_worker_password=$RF_WORKER_PASSWORD" \
+                -v "rf_migrator_password=$RF_MIGRATOR_PASSWORD" \
+                -v "database_name=$POSTGRES_DB" <<'SQL'
+              DO $$
+              BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'rf_owner') THEN
+                      CREATE ROLE rf_owner NOLOGIN;
+                  END IF;
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'rf_app') THEN
+                      CREATE ROLE rf_app LOGIN;
+                  END IF;
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'rf_worker') THEN
+                      CREATE ROLE rf_worker LOGIN;
+                  END IF;
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'rf_migrator') THEN
+                      CREATE ROLE rf_migrator LOGIN;
+                  END IF;
+              END
+              $$;
+              ALTER ROLE rf_app LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD :'rf_app_password';
+              ALTER ROLE rf_worker LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD :'rf_worker_password';
+              ALTER ROLE rf_migrator LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD :'rf_migrator_password';
+              ALTER ROLE rf_owner NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+              GRANT CONNECT ON DATABASE :"database_name" TO rf_app, rf_worker, rf_migrator;
+              GRANT USAGE ON SCHEMA public TO rf_app, rf_worker, rf_migrator;
+              GRANT CREATE ON SCHEMA public TO rf_migrator;
+              REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+              REVOKE CREATE ON SCHEMA public FROM rf_app, rf_worker;
+              REVOKE rf_owner FROM rf_app;
+              REVOKE rf_owner FROM rf_worker;
+              SQL

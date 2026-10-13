@@ -52,11 +52,18 @@ spec:
             - secretRef:
                 name: resume-filter-secrets
           env:
+            - name: POSTGRES_USER
+              value: "rf_worker"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: resume-filter-secrets
-                  key: POSTGRES_PASSWORD
+                  name: resume-filter-db-secrets
+                  key: RF_WORKER_PASSWORD
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: WORKER_DATABASE_URL
           readinessProbe:
             exec:
               command:

@@ -41,6 +41,19 @@ spec:
                 name: resume-filter-config
             - secretRef:
                 name: resume-filter-secrets
+          env:
+            - name: POSTGRES_USER
+              value: "rf_app"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: RF_APP_PASSWORD
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: API_DATABASE_URL
           readinessProbe:
             httpGet:
               path: /flower/healthcheck

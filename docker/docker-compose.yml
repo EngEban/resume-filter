@@ -16,10 +16,11 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-rf_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rf_pass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: ${POSTGRES_DB:-rf_db}
-      APP_DB_USER: ${APP_DB_USER:-rf_app}
-      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
+      RF_APP_PASSWORD: ${RF_APP_PASSWORD:?RF_APP_PASSWORD must be set}
+      RF_WORKER_PASSWORD: ${RF_WORKER_PASSWORD:?RF_WORKER_PASSWORD must be set}
+      RF_MIGRATOR_PASSWORD: ${RF_MIGRATOR_PASSWORD:?RF_MIGRATOR_PASSWORD must be set}
     ports:
       - "5432:5432"
     volumes:
@@ -27,10 +28,35 @@ services:
       - ./postgres/init-rls.sql:/docker-entrypoint-initdb.d/01-rls.sql:ro
       - ./postgres/02-create-app-role.sh:/docker-entrypoint-initdb.d/02-create-app-role.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER:-rf_app} -d ${POSTGRES_DB:-rf_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rf_user} -d ${POSTGRES_DB:-rf_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - rf_network
+
+  # Idempotent role provisioning for new and existing databases. This uses
+  # the bootstrap connection only and is not an application runtime.
+  role-provision:
+    image: postgres:16-alpine
+    container_name: rf_role_provision
+    restart: "no"
+    command: ["sh", "/usr/local/bin/02-create-app-role.sh"]
+    env_file:
+      - ../.env
+    environment:
+      PGHOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-rf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:-rf_db}
+      RF_APP_PASSWORD: ${RF_APP_PASSWORD:?RF_APP_PASSWORD must be set}
+      RF_WORKER_PASSWORD: ${RF_WORKER_PASSWORD:?RF_WORKER_PASSWORD must be set}
+      RF_MIGRATOR_PASSWORD: ${RF_MIGRATOR_PASSWORD:?RF_MIGRATOR_PASSWORD must be set}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./postgres/02-create-app-role.sh:/usr/local/bin/02-create-app-role.sh:ro
     networks:
       - rf_network
 
@@ -85,11 +111,16 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${APP_DB_USER:-rf_app}
-      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
-      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
+      POSTGRES_USER: rf_app
+      POSTGRES_PASSWORD: ${RF_APP_PASSWORD:?RF_APP_PASSWORD must be set}
+      DATABASE_URL: ${API_DATABASE_URL:?API_DATABASE_URL must be set}
+      RF_APP_PASSWORD: ""
+      RF_WORKER_PASSWORD: ""
+      RF_MIGRATOR_PASSWORD: ""
+      WORKER_DATABASE_URL: ""
+      MIGRATOR_DATABASE_URL: ""
     depends_on:
-      migrate:
+      runtime-grants:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
@@ -131,16 +162,51 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-rf_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rf_pass}
-      DATABASE_URL: postgresql+asyncpg://rf_user:rf_pass@postgres:5432/rf_db
+      POSTGRES_USER: rf_migrator
+      POSTGRES_PASSWORD: ${RF_MIGRATOR_PASSWORD:?RF_MIGRATOR_PASSWORD must be set}
+      DATABASE_URL: ${MIGRATOR_DATABASE_URL:?MIGRATOR_DATABASE_URL must be set}
+      RF_APP_PASSWORD: ""
+      RF_WORKER_PASSWORD: ""
+      RF_MIGRATOR_PASSWORD: ""
+      API_DATABASE_URL: ""
+      WORKER_DATABASE_URL: ""
     depends_on:
+      role-provision:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     volumes:
       - ../app:/app/app
       - ../alembic:/app/alembic
       - ../scripts:/app/scripts
+    networks:
+      - rf_network
+
+  # Apply the smallest current CRUD grants after the schema exists.
+  # This intentionally does not change ownership or RLS.
+  runtime-grants:
+    image: postgres:16-alpine
+    container_name: rf_runtime_grants
+    restart: "no"
+    command: ["sh", "/usr/local/bin/apply-runtime-grants.sh"]
+    env_file:
+      - ../.env
+    environment:
+      PGHOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-rf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:-rf_db}
+      RF_APP_PASSWORD: ""
+      RF_WORKER_PASSWORD: ""
+      RF_MIGRATOR_PASSWORD: ""
+      API_DATABASE_URL: ""
+      WORKER_DATABASE_URL: ""
+      MIGRATOR_DATABASE_URL: ""
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ./postgres/apply-runtime-grants.sh:/usr/local/bin/apply-runtime-grants.sh:ro
     networks:
       - rf_network
 
@@ -161,11 +227,16 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${APP_DB_USER:-rf_app}
-      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
-      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
+      POSTGRES_USER: rf_worker
+      POSTGRES_PASSWORD: ${RF_WORKER_PASSWORD:?RF_WORKER_PASSWORD must be set}
+      DATABASE_URL: ${WORKER_DATABASE_URL:?WORKER_DATABASE_URL must be set}
+      RF_APP_PASSWORD: ""
+      RF_WORKER_PASSWORD: ""
+      RF_MIGRATOR_PASSWORD: ""
+      API_DATABASE_URL: ""
+      MIGRATOR_DATABASE_URL: ""
     depends_on:
-      migrate:
+      runtime-grants:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
@@ -193,12 +264,17 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_USER: ${APP_DB_USER:-rf_app}
-      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-rf_pass}
-      DATABASE_URL: postgresql+asyncpg://rf_app:rf_pass@postgres:5432/rf_db
+      POSTGRES_USER: rf_app
+      POSTGRES_PASSWORD: ${RF_APP_PASSWORD:?RF_APP_PASSWORD must be set}
+      DATABASE_URL: ${API_DATABASE_URL:?API_DATABASE_URL must be set}
+      RF_APP_PASSWORD: ""
+      RF_WORKER_PASSWORD: ""
+      RF_MIGRATOR_PASSWORD: ""
+      WORKER_DATABASE_URL: ""
+      MIGRATOR_DATABASE_URL: ""
     depends_on:
       - redis
-      - worker
+      - runtime-grants
     networks:
       - rf_network
 

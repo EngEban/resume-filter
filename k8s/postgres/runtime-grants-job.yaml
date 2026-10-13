@@ -1,0 +1,81 @@
+# Apply runtime table grants after the migration Job completes.
+# Run this Job only after the schema exists. It does not change ownership or RLS.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: resume-filter-runtime-grants
+  namespace: resume-filter
+  labels:
+    app.kubernetes.io/name: resume-filter
+    app.kubernetes.io/component: database-runtime-grants
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: resume-filter
+        app.kubernetes.io/component: database-runtime-grants
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: runtime-grants
+          image: postgres:16-alpine
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_HOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: resume-filter-config
+                  key: POSTGRES_BOOTSTRAP_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: resume-filter-db-secrets
+                  key: POSTGRES_BOOTSTRAP_PASSWORD
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+              export PGPASSWORD="$POSTGRES_PASSWORD"
+              psql -v ON_ERROR_STOP=1 <<'SQL'
+              GRANT SELECT, INSERT ON TABLE public.tenants, public.users TO rf_app;
+              GRANT SELECT, INSERT, UPDATE ON TABLE public.batches, public.resumes TO rf_app;
+              GRANT SELECT, INSERT ON TABLE public.analyses TO rf_app;
+              GRANT SELECT ON TABLE public.tenants TO rf_worker;
+              GRANT SELECT, UPDATE ON TABLE public.batches, public.resumes TO rf_worker;
+              GRANT ALL PRIVILEGES
+                  ON TABLE public.tenants, public.users, public.batches, public.resumes, public.analyses
+                  TO rf_migrator;
+              GRANT SELECT, INSERT, UPDATE, DELETE
+                  ON TABLE public.alembic_version
+                  TO rf_migrator;
+              DO $$
+              DECLARE
+                  sequence_name text;
+              BEGIN
+                  FOR sequence_name IN
+                      SELECT quote_ident(n.nspname) || '.' || quote_ident(c.relname)
+                      FROM pg_class c
+                      JOIN pg_namespace n ON n.oid = c.relnamespace
+                      WHERE n.nspname = 'public' AND c.relkind = 'S'
+                  LOOP
+                      EXECUTE format('GRANT USAGE, SELECT ON SEQUENCE %s TO rf_app, rf_migrator', sequence_name);
+                  END LOOP;
+              END
+              $$;
+              SQL

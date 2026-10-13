@@ -60,13 +60,18 @@ kubectl create secret generic resume-filter-secrets \
   --namespace resume-filter \
   --from-literal=SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(64))')" \
   --from-literal=MASTER_KEY="$(python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" \
-  --from-literal=POSTGRES_PASSWORD="$(openssl rand -hex 32)" \
   --from-literal=MINIO_ROOT_USER="minioadmin" \
   --from-literal=MINIO_ROOT_PASSWORD="$(openssl rand -hex 32)" \
   --from-literal=MINIO_ACCESS_KEY="minioadmin" \
   --from-literal=MINIO_SECRET_KEY="$(openssl rand -hex 32)" \
   --from-literal=PLATFORM_LLM_API_KEY="gsk_xxxxx" \
   --from-literal=UI_STORAGE_SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+Create a separate `resume-filter-db-secrets` Secret for the PostgreSQL
+bootstrap password, the three role passwords, and the three role-specific
+database URLs. Keep it out of ConfigMaps and source control.
+
+The checked-in `k8s/secrets.yaml.example` contains only empty placeholders
+for those database keys; populate them through the cluster secret manager.
 Option B — via YAML:
 
 Copy secrets.yaml.example to secrets.yaml, fill in the values,
@@ -76,8 +81,6 @@ bash
 kubectl apply -f k8s/secrets.yaml
 3. Update the ConfigMap
 Edit k8s/configmap.yaml and replace:
-
-DATABASE_URL — use the actual PostgreSQL password
 
 CORS_ORIGINS — your production domain
 
@@ -94,7 +97,8 @@ docker push ghcr.io/your-username/resume-filter-api:latest
 docker push ghcr.io/your-username/resume-filter-worker:latest
 5. Deploy infrastructure
 bash
-kubectl apply -f k8s/postgres/
+kubectl apply -f k8s/postgres/statefulset.yaml
+kubectl apply -f k8s/postgres/service.yaml
 kubectl apply -f k8s/redis/
 kubectl apply -f k8s/minio/
 Wait for readiness:
@@ -111,15 +115,17 @@ kubectl wait --for=condition=ready pod \
 kubectl wait --for=condition=ready pod \
   -l app.kubernetes.io/component=minio \
   -n resume-filter --timeout=120s
-6. Run database migrations
+6. Provision database roles and run database migrations
 bash
-kubectl run resume-filter-migrate \
-  --namespace resume-filter \
-  --rm -it --restart=Never \
-  --image=ghcr.io/your-username/resume-filter-api:latest \
-  --env-from=configmap/resume-filter-config \
-  --env-from=secret/resume-filter-secrets \
-  -- alembic upgrade head
+kubectl apply -f k8s/postgres/role-provision-job.yaml
+kubectl wait --for=condition=complete job/resume-filter-role-provision \
+  -n resume-filter --timeout=180s
+kubectl apply -f k8s/migrate/job.yaml
+kubectl wait --for=condition=complete job/resume-filter-migrate \
+  -n resume-filter --timeout=300s
+kubectl apply -f k8s/postgres/runtime-grants-job.yaml
+kubectl wait --for=condition=complete job/resume-filter-runtime-grants \
+  -n resume-filter --timeout=180s
 7. Deploy the application
 bash
 kubectl apply -f k8s/api/

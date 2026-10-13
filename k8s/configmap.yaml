@@ -16,7 +16,9 @@ data:
   LOG_LEVEL: "INFO"
   LOG_JSON: "true"
 
-  POSTGRES_USER: "rf_user"
+  # Bootstrap role used only by the PostgreSQL StatefulSet and provisioning Jobs.
+  # API and Celery receive their own role through deployment env vars.
+  POSTGRES_BOOTSTRAP_USER: "rf_user"
   POSTGRES_DB: "rf_db"
   POSTGRES_HOST: "resume-filter-postgres"
   POSTGRES_PORT: "5432"
