@@ -16,8 +16,8 @@ def db_params() -> dict:
     return {
         "host": os.getenv("POSTGRES_HOST", "postgres"),
         "port": int(os.getenv("POSTGRES_PORT", "5432")),
-        "user": os.getenv("POSTGRES_USER", "rf_user"),
-        "password": os.getenv("POSTGRES_PASSWORD", "rf_pass"),
+        "user": os.getenv("POSTGRES_USER", "rf_app"),
+        "password": os.getenv("POSTGRES_PASSWORD", ""),
         "dbname": os.getenv("POSTGRES_DB", "rf_db"),
     }
 

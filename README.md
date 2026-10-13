@@ -32,10 +32,10 @@ It combines a **transparent 6-factor ATS engine** with a
 ### For Organizations (B2B)
 - 📦 **Batch processing** — Upload hundreds of resumes, get them scored in parallel.
 - 🏢 **Multi-tenant** — Full data isolation via PostgreSQL Row-Level Security.
-- 🔑 **Bring Your Own Key (BYOK)** — Connect OpenAI, Anthropic, Gemini, Groq, Azure, Bedrock, or a local Ollama.
+- 🔑 **Central AI provider** — All organizations use the platform-managed provider and API key.
 - 📊 **Shortlist reports** — Ranked candidates with per-factor breakdown and evidence.
 - 👥 **Role-based access** — Owner, admin, member, viewer.
-- 🎛️ **Fallback to platform key** — Use the built-in provider or your own.
+- 🎛️ **Central routing** — The platform can change provider and model from server configuration.
 
 ### For Individuals (B2C)
 - 🎯 **Instant ATS score** against any job description.

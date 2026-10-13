@@ -143,15 +143,15 @@ LiteLLM provides a single async API (acompletion) that talks to
 100+ providers. It normalizes request and response shapes, handles
 retries, and tracks token usage.
 
-4.2 Resolution Order
+4.2 Resolution
 text
 resolve_llm_config(tenant)
     │
-    ├── tenant.llm_api_key_encrypted present?
-    │       → decrypt → use tenant's provider
-    │
-    └── otherwise
-            → use platform default (settings.PLATFORM_LLM_*)
+    └── use platform configuration (settings.PLATFORM_LLM_*)
+
+The tenant argument is retained for request compatibility and future usage
+metering only. Retained tenant BYOK columns are not read by active provider
+selection and are not written by the B2B settings API.
 4.3 Model Naming
 Always use the <provider>/<model> format:
 
@@ -162,11 +162,10 @@ anthropic/claude-sonnet-4-20250514
 gemini/gemini-1.5-flash
 ollama/llama3.1:8b
 4.4 Security
-Keys are encrypted with Fernet using MASTER_KEY.
-
-Decryption happens only inside the worker or request that needs it.
-
-Decrypted keys are never logged and never serialized to the client.
+The central platform key is loaded from server-side configuration and is never
+serialized to tenant responses or logs. Platform endpoints are restricted to
+official provider hosts (or the project-owned Ollama service), and provider
+requests do not follow redirects.
 
 5. ATS Engine
 5.1 Factors and Weights

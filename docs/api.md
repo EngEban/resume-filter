@@ -222,7 +222,7 @@ json
   "error_message": null,
   "created_at": "2026-10-02T12:00:00Z"
 }
-B2B — LLM Settings (BYOK)
+B2B — Platform-managed LLM Settings
 Get current settings
 http
 GET /api/v1/b2b/settings/llm
@@ -237,34 +237,22 @@ json
   "base_url": null,
   "source": "platform"
 }
-source is either "platform" (using the shared key) or "tenant"
-(using the tenant's own key).
+The source is always "platform". The API never returns the platform key or
+the platform network endpoint.
 
-Update settings
+Update settings (not available to organizations)
 http
 PUT /api/v1/b2b/settings/llm
 Authorization: Bearer <token>
-Content-Type: application/json
+Response 409 — LLM settings are managed centrally by the platform.
 
-{
-  "provider": "anthropic",
-  "model": "anthropic/claude-sonnet-4-20250514",
-  "api_key": "sk-ant-...",
-  "base_url": null
-}
-Response 200 — same shape as GET.
-
-The API key is encrypted with Fernet before storage.
-
-Delete custom key
+Delete custom key (not available to organizations)
 http
 DELETE /api/v1/b2b/settings/llm
 Authorization: Bearer <token>
-Response 204 — No content.
+Response 409 — LLM settings are managed centrally by the platform.
 
-Reverts the tenant to the platform default.
-
-List supported providers
+List active platform provider
 http
 GET /api/v1/b2b/settings/llm/providers
 Authorization: Bearer <token>
@@ -272,31 +260,24 @@ Response 200
 
 json
 {
-  "providers": [
-    {
-      "provider": "groq",
-      "models": ["groq/llama-3.3-70b-versatile", "..."],
-      "requires_api_key": true,
-      "supports_base_url": false
-    }
-  ],
+  "providers": [{
+    "provider": "groq",
+    "models": ["groq/llama-3.1-8b-instant"],
+    "requires_api_key": true,
+    "supports_base_url": false
+  }],
   "platform_default": {
     "provider": "groq",
     "model": "groq/llama-3.1-8b-instant"
   }
 }
-Test connection
+Test the platform connection
 http
 POST /api/v1/b2b/settings/llm/test
 Authorization: Bearer <token>
-Content-Type: application/json
 
-{
-  "provider": "openai",
-  "model": "openai/gpt-4o-mini",
-  "api_key": "sk-...",
-  "base_url": null
-}
+The request body is ignored; provider, model, credentials, and endpoint are
+resolved from the platform server configuration.
 Response 200
 
 json
