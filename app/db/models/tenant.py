@@ -4,7 +4,7 @@
 # ============================================================
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Integer, String, Text
+from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
@@ -19,6 +19,9 @@ class Tenant(Base, UUIDMixin, TimestampMixin):
 
     Each tenant has its own users, batches, and resumes.
     Data isolation is enforced via PostgreSQL Row-Level Security.
+
+    LLM usage is platform-managed — the platform's API key is used
+    for every tenant. No per-tenant credentials are stored.
     """
 
     __tablename__ = "tenants"
@@ -31,14 +34,6 @@ class Tenant(Base, UUIDMixin, TimestampMixin):
     plan: Mapped[str] = mapped_column(String(50), default="free", nullable=False)
     monthly_limit: Mapped[int] = mapped_column(Integer, default=100, nullable=False)
     concurrent_batches_limit: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-
-    # ---------- LLM Configuration ----------
-    # Tenant's own provider credentials (BYOK).
-    # If null, the platform-wide default is used.
-    llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    llm_model: Mapped[str | None] = mapped_column(String(150), nullable=True)
-    llm_api_key_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
-    llm_base_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # ---------- Status ----------
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

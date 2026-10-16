@@ -2,7 +2,7 @@
 # app/schemas/settings.py
 # Pydantic schemas for tenant LLM settings.
 # ============================================================
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 SUPPORTED_PROVIDERS = [
     "groq",
@@ -50,10 +50,6 @@ SUGGESTED_MODELS: dict[str, list[str]] = {
 }
 
 
-class LLMSettingsUpdate(BaseModel):
-    """Deprecated BYOK payload; retained only for import compatibility."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class LLMSettingsRead(BaseModel):

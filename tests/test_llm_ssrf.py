@@ -25,12 +25,7 @@ def test_resolve_llm_config_always_uses_platform_settings(monkeypatch):
     monkeypatch.setattr(app_settings, "PLATFORM_LLM_API_KEY", "platform-key")
     monkeypatch.setattr(app_settings, "PLATFORM_LLM_BASE_URL", None)
 
-    tenant = SimpleNamespace(
-        llm_provider="openai",
-        llm_model="openai/private-model",
-        llm_api_key_encrypted="retained-old-value",
-        llm_base_url="https://api.openai.com/v1",
-    )
+    tenant = SimpleNamespace()
 
     config = resolve_llm_config(tenant)
 
@@ -48,7 +43,7 @@ def test_provider_factory_does_not_use_tenant_connection_settings(monkeypatch):
         api_key="platform-key",
         source="platform",
     )
-    tenant = SimpleNamespace(llm_api_key_encrypted="retained-old-value")
+    tenant = SimpleNamespace()
 
     monkeypatch.setattr(providers_module, "resolve_llm_config", lambda: config)
     monkeypatch.setattr(providers_module, "UnifiedLLMProvider", lambda received: received)
@@ -116,7 +111,6 @@ async def test_connection_test_uses_platform_config_without_client_values(monkey
             created.append(received)
 
         async def complete(self, **kwargs):
-            assert kwargs["follow_redirects"] is False
             return SimpleNamespace()
 
     monkeypatch.setattr(settings_module, "UnifiedLLMProvider", FakeProvider)

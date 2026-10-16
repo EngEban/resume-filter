@@ -110,7 +110,6 @@ async def test_llm_connection(
             system_prompt="You are a health check.",
             user_prompt="Reply with the single word: ok",
             max_tokens=10,
-            follow_redirects=False,
         )
     except Exception as exc:
         logger.warning(
