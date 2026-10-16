@@ -49,9 +49,9 @@ export function UserMenu() {
         { label: 'Settings', href: '/settings', icon: 'fa-solid fa-gear' },
       ];
 
-  async function handleLogout() {
+    function handleLogout() {
     setOpen(false);
-    await logout();
+    logout();
     navigate('/', { replace: true });
   }
 
