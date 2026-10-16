@@ -1,6 +1,7 @@
+\
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { b2cApi, type AnalysisHistoryItem } from '@/lib/api';
+import { b2cApi, APIError, type AnalysisHistoryItem } from '@/lib/api';
 import { BORDER, DANGER, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
 
 type HistoryStatus = 'completed' | 'pending';
@@ -32,6 +33,9 @@ export default function HistoryPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | HistoryStatus>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -60,6 +64,32 @@ export default function HistoryPage() {
     });
   }, [analyses, search, statusFilter]);
 
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this analysis? This cannot be undone.')) return;
+    setDeletingId(id);
+    try {
+      await b2cApi.deleteAnalysis(id);
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      alert(err instanceof APIError ? err.message : 'Failed to delete.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  async function handleClearAll() {
+    setClearing(true);
+    try {
+      await b2cApi.clearHistory();
+      setAnalyses([]);
+      setShowClearModal(false);
+    } catch (err) {
+      alert(err instanceof APIError ? err.message : 'Failed to clear.');
+    } finally {
+      setClearing(false);
+    }
+  }
+
   return (
     <div className="space-y-8 page-enter">
       {/* Header */}
@@ -69,7 +99,22 @@ export default function HistoryPage() {
           <h1 className="text-4xl font-bold tracking-tight text-ink-900">Analysis History</h1>
           <p className="text-ink-600">Review your previous resume analyses and results.</p>
         </div>
-        <Link to="/analyze" className="btn btn-primary">Analyze New Resume</Link>
+        <div className="flex gap-2">
+          {analyses.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowClearModal(true)}
+              className="btn btn-secondary"
+            >
+              <i className="fa-solid fa-trash-can text-xs" />
+              Clear all
+            </button>
+          )}
+          <Link to="/analyze" className="btn btn-primary">
+            <i className="fa-solid fa-plus text-xs" />
+            New Analysis
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -136,11 +181,13 @@ export default function HistoryPage() {
 
           {loadState === 'ready' && analyses.length === 0 && (
             <div className="py-16 text-center">
-              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">↺</div>
+              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">
+                <i className="fa-solid fa-clock-rotate-left text-brand-600" />
+              </div>
               <h3 className="mt-4 text-base font-semibold text-ink-900">No analyses yet</h3>
               <p className="mt-1 text-sm text-ink-500">Your resume analyses will appear here.</p>
-              <Link to="/analyze" className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">
-                Analyze your first resume <i className="fa-solid fa-arrow-right" />
+              <Link to="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                Analyze your first resume <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
             </div>
           )}
@@ -167,6 +214,7 @@ export default function HistoryPage() {
                 const level = typeof item.ats_score === 'number' ? scoreLevel(item.ats_score) : 'weak';
                 const breakdown = item.breakdown ?? {};
                 const entries = Object.entries(breakdown);
+                const isDeleting = deletingId === item.id;
 
                 return (
                   <div key={item.id} className="transition-colors hover:bg-brand-50/40">
@@ -198,6 +246,20 @@ export default function HistoryPage() {
                           aria-expanded={isExpanded}
                         >
                           {isExpanded ? 'Hide details' : 'View details'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item.id)}
+                          disabled={isDeleting}
+                          className="grid h-8 w-8 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
+                          title="Delete analysis"
+                          aria-label="Delete analysis"
+                        >
+                          {isDeleting ? (
+                            <i className="fa-solid fa-spinner fa-spin text-xs" />
+                          ) : (
+                            <i className="fa-solid fa-trash-can text-xs" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -235,6 +297,52 @@ export default function HistoryPage() {
           )}
         </div>
       </section>
+
+      {/* Clear All Modal */}
+      {showClearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-ink-100 bg-white p-6 shadow-elevated animate-scale-in">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-red-100 text-red-600">
+              <i className="fa-solid fa-triangle-exclamation text-2xl" />
+            </div>
+            <h2 className="mt-4 text-center font-display text-xl font-bold text-ink-900">
+              Clear entire history?
+            </h2>
+            <p className="mt-2 text-center text-sm text-ink-600">
+              This will permanently delete all <strong>{analyses.length}</strong> analyses.
+              This action cannot be undone.
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setShowClearModal(false)}
+                disabled={clearing}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                disabled={clearing}
+                className="btn bg-red-600 text-white hover:bg-red-700"
+              >
+                {clearing ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin text-xs" />
+                    Clearing...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-trash-can text-xs" />
+                    Clear all
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

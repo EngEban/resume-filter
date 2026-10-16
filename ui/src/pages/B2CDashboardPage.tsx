@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { b2cApi, type AnalysisHistoryItem } from '@/lib/api';
+import { b2cApi, APIError, type AnalysisHistoryItem } from '@/lib/api';
 import { BORDER, PRIMARY, TEXT_MUTED, TEXT_PRIMARY, VIOLET } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
@@ -18,6 +18,7 @@ export default function B2CDashboardPage() {
   const [analyses, setAnalyses] = useState<AnalysisHistoryItem[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -35,6 +36,19 @@ export default function B2CDashboardPage() {
     void load();
     return () => { active = false; };
   }, [refreshKey]);
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this analysis?')) return;
+    setDeletingId(id);
+    try {
+      await b2cApi.deleteAnalysis(id);
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      alert(err instanceof APIError ? err.message : 'Failed to delete.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const thisMonthCount = useMemo(() => {
     const now = new Date();
@@ -55,7 +69,7 @@ export default function B2CDashboardPage() {
       {/* Header */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Overview</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">
+        <h1 className="text-4xl font-bold tracking-tight text-ink-900">
           Welcome back, {user?.display_name || user?.email?.split('@')[0] || 'there'}
         </h1>
         <p className="text-ink-600">Your resume analysis workspace.</p>
@@ -90,51 +104,87 @@ export default function B2CDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Your workspace</p>
             <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink-900">Recent activity</h2>
           </div>
-          <Link to="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">View history <i className="fa-solid fa-arrow-right" /></Link>
+          <Link to="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">
+            View history <i className="fa-solid fa-arrow-right" />
+          </Link>
         </div>
 
         <div className="rounded-2xl border bg-white" style={{ borderColor: BORDER }}>
           {loadState === 'loading' && (
-            <div className="space-y-3 p-6">{[1, 2, 3].map((i) => <div key={i} className="h-12 skeleton" />)}</div>
+            <div className="space-y-3 p-6">
+              {[1, 2, 3].map((i) => <div key={i} className="h-12 skeleton" />)}
+            </div>
           )}
 
           {loadState === 'error' && (
             <div className="py-12 text-center text-sm text-ink-500">
               <p>Unable to load your activity.</p>
-              <button type="button" onClick={() => setRefreshKey((value) => value + 1)} className="mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700">Try again</button>
+              <button
+                type="button"
+                onClick={() => setRefreshKey((value) => value + 1)}
+                className="mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700"
+              >
+                Try again
+              </button>
             </div>
           )}
 
           {loadState === 'ready' && analyses.length === 0 && (
             <div className="py-14 text-center">
-              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl"><i className="fa-solid fa-file-lines" /></div>
+              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">
+                <i className="fa-solid fa-file-lines text-brand-600" />
+              </div>
               <h3 className="mt-4 text-base font-semibold text-ink-900">No analyses yet</h3>
               <p className="mt-1 text-sm text-ink-500">Upload your first resume to see your results here.</p>
-              <Link to="/analyze" className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">
-                Analyze your first resume <i className="fa-solid fa-arrow-right" />
+              <Link to="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                Analyze your first resume <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
             </div>
           )}
 
           {loadState === 'ready' && analyses.length > 0 && (
             <div className="divide-y" style={{ borderColor: BORDER }}>
-              {analyses.slice(0, 5).map((a) => (
-                <div key={a.id} className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-brand-50/40 transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="h-10 w-10 rounded-xl bg-brand-50 grid place-items-center text-sm font-semibold text-brand-700">CV</span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-900">Analysis · {a.id.slice(0, 8)}</p>
-                      <p className="text-xs text-ink-500">{formatDate(a.created_at)}</p>
+              {analyses.slice(0, 5).map((a) => {
+                const isDeleting = deletingId === a.id;
+                return (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-brand-50/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="h-10 w-10 rounded-xl bg-brand-50 grid place-items-center text-sm font-semibold text-brand-700">
+                        CV
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink-900">
+                          Analysis · {a.id.slice(0, 8)}
+                        </p>
+                        <p className="text-xs text-ink-500">{formatDate(a.created_at)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="badge badge-success">Completed</span>
+                      <span className="text-sm font-semibold text-ink-900 tabular-nums">
+                        {typeof a.ats_score === 'number' ? `${Math.round(a.ats_score)}%` : '—'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(a.id)}
+                        disabled={isDeleting}
+                        className="grid h-8 w-8 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
+                        title="Delete"
+                        aria-label="Delete analysis"
+                      >
+                        {isDeleting ? (
+                          <i className="fa-solid fa-spinner fa-spin text-xs" />
+                        ) : (
+                          <i className="fa-solid fa-trash-can text-xs" />
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="badge badge-success">Completed</span>
-                    <span className="text-sm font-semibold text-ink-900 tabular-nums">
-                      {typeof a.ats_score === 'number' ? `${Math.round(a.ats_score)}%` : '—'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
