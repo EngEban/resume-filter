@@ -210,3 +210,201 @@
 @keyframes gradient-shift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes signalOrbit { 0% { transform: scale(.82); opacity: .1; } 45% { opacity: .75; } 100% { transform: scale(1.08); opacity: 0; } }
+
+
+/* ============================================================
+ * F5: Enhanced Animations & Micro-interactions
+ * ============================================================ */
+
+/* ---------- Smooth scrolling ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------- Stagger children (sequential appearance) ---------- */
+.stagger > * {
+  animation: fade-in-up 0.5s ease-out both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ---------- Enhanced hover-lift ---------- */
+.hover-lift {
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 25px -5px rgba(124, 58, 237, 0.12),
+    0 10px 10px -5px rgba(236, 72, 153, 0.06);
+}
+
+/* ---------- Button press effect ---------- */
+.btn {
+  transition:
+    transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms,
+    background-color 200ms,
+    color 200ms,
+    border-color 200ms;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Card interactive ---------- */
+.card-interactive {
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 240ms,
+    box-shadow 240ms;
+}
+.card-interactive:hover {
+  transform: translateY(-3px);
+  border-color: #C084FC;
+  box-shadow:
+    0 10px 15px -3px rgba(124, 58, 237, 0.08),
+    0 4px 6px -2px rgba(236, 72, 153, 0.05);
+}
+
+/* ---------- Link underline slide ---------- */
+.link-animated {
+  position: relative;
+}
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #7C3AED 0%, #EC4899 100%);
+  transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 9999px;
+}
+.link-animated:hover::after {
+  width: 100%;
+}
+
+/* ---------- Enhanced input focus ---------- */
+.input {
+  transition:
+    border-color 200ms,
+    box-shadow 200ms,
+    background-color 200ms;
+}
+.input:focus {
+  outline: none;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+.input:hover:not(:focus) {
+  border-color: #CBD5E1;
+}
+
+/* ---------- Skeleton shimmer ---------- */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #F1F5F9 0%,
+    #E2E8F0 50%,
+    #F1F5F9 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------- Bounce (scroll indicator / attention) ---------- */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* ---------- Count-up entrance ---------- */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-count-up {
+  animation: count-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Scale-in entrance ---------- */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Slide from left ---------- */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Slide from right ---------- */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Accessibility: reduce motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
