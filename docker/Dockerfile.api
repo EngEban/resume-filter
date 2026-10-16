@@ -1,5 +1,5 @@
 # ============================================================
-# ResumeFilter - FastAPI Dockerfile
+# Talentscope - FastAPI Dockerfile
 # Multi-stage build for smaller production image
 # ============================================================
 
@@ -8,28 +8,35 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# تثبيت أدوات البناء المؤقتة
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Use Aliyun mirror for apt (fast from Middle East)
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true && \
+    sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list 2>/dev/null || true && \
+    apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# إنشاء virtualenv
+# Create virtualenv
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# ترقية pip وتثبيت المكتبات
+# Install Python dependencies from Tsinghua mirror
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip config set global.trusted-host pypi.tuna.tsinghua.edu.cn && \
+    pip install --no-cache-dir --upgrade pip --timeout 120 --retries 5 && \
+    pip install --no-cache-dir -r requirements.txt --timeout 120 --retries 5
+
 
 # ---------- Stage 2: Production ----------
 FROM python:3.12-slim AS production
 
 WORKDIR /app
 
-# تثبيت مكتبات النظام المطلوبة وقت التشغيل
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Use Aliyun mirror for apt
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true && \
+    sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list 2>/dev/null || true && \
+    apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libgl1 \
     libglib2.0-0 \
@@ -37,19 +44,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-ara \
     && rm -rf /var/lib/apt/lists/*
 
-# نسخ virtualenv من المرحلة الأولى
+# Copy virtualenv from builder stage
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# مستخدم غير root للأمان
+# Non-root user for security
 RUN useradd --create-home --shell /bin/bash appuser
 
-# نسخ الكود
+# Copy application code
 COPY --chown=appuser:appuser . .
 
 USER appuser
 
 EXPOSE 8000
 
-# الأمر الافتراضي (يمكن تجاوزه من docker-compose)
+# Default command (can be overridden by docker-compose)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
