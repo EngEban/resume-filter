@@ -22,6 +22,9 @@ eggs/
 .eggs/
 lib/
 lib64/
+# But DO track the frontend's lib folder
+!/ui/src/lib/
+!/ui/src/lib/**
 parts/
 sdist/
 var/
