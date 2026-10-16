@@ -30,7 +30,8 @@ export function UserMenu() {
 
   if (!user) return null;
 
-  const displayName = user.display_name || user.email.split('@')[0];
+    const displayName =
+    user.display_name || user.email.split('@')[0] || 'User';
   const initial = (displayName[0] || '?').toUpperCase();
   const isB2B = user.account_type === 'b2b';
 
