@@ -27,6 +27,7 @@ import B2BResumeDetailsPage from './pages/B2BResumeDetailsPage';
 import B2BSettingsPage from './pages/B2BSettingsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import ContactPage from './pages/ContactPage';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
       <Route path="*" element={<PublicLayout><NotFoundPage /></PublicLayout>} />
       <Route path="/auth/callback" element={<PublicLayout showHeader={false} showFooter={false}><AuthCallbackPage /></PublicLayout>} />
       <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
     </Routes>
   );
 }
