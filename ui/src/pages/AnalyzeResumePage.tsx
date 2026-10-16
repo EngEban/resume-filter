@@ -14,10 +14,10 @@ function ext(name: string) {
 }
 
 const TIPS = [
-  { icon: '🎯', title: 'Use a real job posting', text: 'Paste the actual job description — the more specific, the better.' },
-  { icon: '📄', title: 'Upload a text-based PDF', text: 'Scanned images may not extract well. Use text-based PDFs.' },
-  { icon: '📊', title: 'Review your ATS score', text: 'Focus on both matched keywords and missing ones.' },
-  { icon: '💡', title: 'Act on suggestions', text: 'Apply the top 3 suggestions to boost your score fast.' },
+  { iconClass: 'fa-solid fa-bullseye', title: 'Use a real job posting', text: 'Paste the actual job description — the more specific, the better.' },
+  { iconClass: 'fa-solid fa-file-lines', title: 'Upload a text-based PDF', text: 'Scanned images may not extract well. Use text-based PDFs.' },
+  { iconClass: 'fa-solid fa-chart-pie', title: 'Review your ATS score', text: 'Focus on both matched keywords and missing ones.' },
+  { iconClass: 'fa-solid fa-lightbulb', title: 'Act on suggestions', text: 'Apply the top 3 suggestions to boost your score fast.' },
 ];
 
 export default function AnalyzeResumePage() {
@@ -194,7 +194,7 @@ export default function AnalyzeResumePage() {
           {/* Action bar */}
           <div className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: BORDER }}>
             <p className="text-sm" style={{ color: status === 'error' ? DANGER : status === 'success' ? SUCCESS : TEXT_MUTED }}>
-              {message || (file && jobDescription.trim().length >= 20 ? '✅ Ready to analyze.' : 'Add a resume and a job description.')}
+              {message || (file && jobDescription.trim().length >= 20 ? <><i className="fa-solid fa-circle-check" />{' '}Ready to analyze.</> : 'Add a resume and a job description.')}
             </p>
             <button
               type="submit"
@@ -223,13 +223,13 @@ export default function AnalyzeResumePage() {
           {/* Tips card */}
           <div className="rounded-2xl border bg-gradient-to-br from-brand-50 to-white p-6 shadow-card" style={{ borderColor: '#C7D2FE' }}>
             <div className="flex items-center gap-2">
-              <span className="text-xl">💡</span>
+              <span className="text-xl"><i className="fa-solid fa-lightbulb" /></span>
               <h3 className="text-base font-bold text-ink-900">Tips for better results</h3>
             </div>
             <ul className="mt-5 space-y-4 stagger">
               {TIPS.map((tip) => (
                 <li key={tip.title} className="flex gap-3 items-start">
-                  <span className="text-lg shrink-0">{tip.icon}</span>
+                  <span className="text-lg shrink-0"><i className={tip.iconClass} /></span>
                   <div>
                     <p className="text-sm font-semibold text-ink-900">{tip.title}</p>
                     <p className="text-xs mt-0.5" style={{ color: TEXT_MUTED }}>{tip.text}</p>

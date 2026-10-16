@@ -172,7 +172,7 @@ export function Sidebar() {
           aria-controls="workspace-navigation"
           aria-label={open ? 'Close navigation' : 'Open navigation'}
         >
-          <span className="text-xl leading-none">{open ? '×' : '☰'}</span>
+          <span className="text-xl leading-none"><i className={open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'} /></span>
         </button>
       </div>
 

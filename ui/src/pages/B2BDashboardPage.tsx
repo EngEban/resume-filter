@@ -39,7 +39,7 @@ export default function B2BDashboardPage() {
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Organization workspace</p>
           <h1 className="text-4xl font-bold tracking-tight text-ink-900">
-            Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
+            Welcome back{user?.display_name ? `, ${user.display_name}` : ''}
           </h1>
           <p className="text-ink-600">Your recruiting intelligence workspace.</p>
         </div>
@@ -89,37 +89,37 @@ export default function B2BDashboardPage() {
             {/* Quick actions */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger">
               <ActionCard
-                icon="📦"
+                iconClass="fa-solid fa-box"
                 title="Batches"
                 description="View and manage all resume batches."
                 target="/b2b/batches"
               />
               <ActionCard
-                icon="👥"
+                iconClass="fa-solid fa-users"
                 title="Candidates"
                 description="Browse all candidates across batches."
                 target="/b2b/candidates"
               />
               <ActionCard
-                icon="📊"
+                iconClass="fa-solid fa-chart-pie"
                 title="Analytics"
                 description="See company-wide hiring insights."
                 target="/b2b/analytics"
               />
               <ActionCard
-                icon="📥"
+                iconClass="fa-solid fa-download"
                 title="Exports"
                 description="Download reports in Excel or PDF."
                 target="/b2b/exports"
               />
               <ActionCard
-                icon="⚙️"
+                iconClass="fa-solid fa-gear"
                 title="AI Settings"
                 description="Connect your own LLM provider."
                 target="/b2b/settings"
               />
               <ActionCard
-                icon="➕"
+                iconClass="fa-solid fa-plus"
                 title="New Batch"
                 description="Upload resumes for screening."
                 target="/b2b/batches"
@@ -135,7 +135,7 @@ export default function B2BDashboardPage() {
                     <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink-900">Latest batches</h2>
                   </div>
                   <Link to="/b2b/batches" className="text-sm font-medium text-brand-600 hover:text-brand-700">
-                    View all →
+                    View all <i className="fa-solid fa-arrow-right" />
                   </Link>
                 </div>
 
@@ -213,17 +213,19 @@ function Stat({ label, value, color }: { label: string; value: number | string; 
   );
 }
 
-function ActionCard({ icon, title, description, target }: { icon: string; title: string; description: string; target: string }) {
+function ActionCard({ iconClass, title, description, target }: { iconClass: string; title: string; description: string; target: string }) {
   return (
     <Link
       to={target}
       className="block rounded-2xl border bg-white p-5 card-interactive hover-lift"
       style={{ borderColor: BORDER }}
     >
-      <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-lg">{icon}</div>
+      <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-lg">
+        <i className={iconClass} />
+      </div>
       <p className="mt-3 text-sm font-semibold text-ink-900">{title}</p>
       <p className="mt-1 text-xs" style={{ color: TEXT_MUTED }}>{description}</p>
-      <p className="mt-3 text-xs font-semibold text-brand-600">Open →</p>
+      <p className="mt-3 text-xs font-semibold text-brand-600">Open <i className="fa-solid fa-arrow-right" /></p>
     </Link>
   );
 }

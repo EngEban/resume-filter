@@ -17,6 +17,7 @@ class UserRead(BaseModel):
     role: str
     account_type: str
     tenant_id: UUID | None = None
+    display_name: str = ""
 
     model_config = {"from_attributes": True}
 

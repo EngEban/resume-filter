@@ -99,7 +99,7 @@ export default function B2BBatchesPage() {
             <p className="text-ink-600">Manage your organization's resume screening workflows.</p>
           </div>
           <Link to="/b2b/batches/new" className="btn btn-primary">
-            + New Batch
+            <i className="fa-solid fa-plus" /> New Batch
           </Link>
         </div>
 
@@ -153,7 +153,7 @@ export default function B2BBatchesPage() {
 
             {loadState === 'ready' && batches.length === 0 && (
               <div className="py-16 text-center">
-                <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-2xl">📦</div>
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-2xl"><i className="fa-solid fa-box" /></div>
                 <h3 className="mt-4 text-base font-semibold text-ink-900">
                   {search || statusFilter ? 'No matching batches' : 'No batches yet'}
                 </h3>

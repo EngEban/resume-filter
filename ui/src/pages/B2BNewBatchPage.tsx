@@ -62,7 +62,7 @@ export default function B2BNewBatchPage() {
     <B2BShell>
       <div className="page-enter space-y-8">
         <Link to="/b2b/batches" className="inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-brand-600">
-          <span aria-hidden="true">←</span> Back to Batches
+          <span aria-hidden="true"><i className="fa-solid fa-arrow-left" /></span> Back to Batches
         </Link>
 
         <header className="max-w-3xl space-y-2">

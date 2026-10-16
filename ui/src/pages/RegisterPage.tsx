@@ -1,6 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Link, useSearchParams } from 'react-router-dom';
 import { authApi, APIError } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 
@@ -9,9 +8,7 @@ type AccountType = 'b2c' | 'b2b';
 const SLUG_RE = /^[a-z0-9-]+$/;
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login: setSession } = useAuth();
 
   const initialType: AccountType = useMemo(
     () => (searchParams.get('type') === 'b2b' ? 'b2b' : 'b2c'),
@@ -25,6 +22,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   function validate(): string {
     if (!email.trim() || !password) {
@@ -57,27 +55,55 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const result =
-        accountType === 'b2c'
-          ? await authApi.registerB2C(email.trim(), password)
-          : await authApi.registerB2B(
-              organizationName.trim(),
-              organizationSlug.trim(),
-              email.trim(),
-              password,
-            );
-
-      const profile = await setSession(result.access_token);
-      const target = profile.account_type === 'b2b' ? '/b2b/batches' : '/dashboard';
-      navigate(target, { replace: true });
+      if (accountType === 'b2c') {
+        await authApi.registerB2C(email.trim(), password);
+      } else {
+        await authApi.registerB2B(
+          organizationName.trim(),
+          organizationSlug.trim(),
+          email.trim(),
+          password,
+        );
+      }
+      setRegisteredEmail(email.trim());
     } catch (error) {
       const detail =
         error instanceof APIError
           ? error.message
           : 'Unable to create your account. Try again.';
       setMessage(detail);
+    } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (registeredEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-ink-50 p-6 page-enter">
+        <div className="w-full max-w-md space-y-6 rounded-2xl border border-ink-200 bg-white p-8 shadow-card">
+          <div className="flex justify-center">
+            <Logo size="md" to="/" />
+          </div>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-100 text-3xl">
+            <i className="fa-solid fa-envelope-open-text" />
+          </div>
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-ink-900">Check your email</h1>
+            <p className="text-sm text-ink-600">
+              We sent a verification link to <strong>{registeredEmail}</strong>.
+              Click it to activate your account.
+            </p>
+            <p className="text-xs text-ink-500">
+              The link expires in 24 hours. Check your Spam folder if it doesn't
+              arrive within 5 minutes.
+            </p>
+          </div>
+          <Link to="/login" className="btn btn-primary w-full inline-block text-center">
+            Back to login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -122,7 +148,7 @@ export default function RegisterPage() {
 
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
-              Start with ResumeFilter
+              Start with Talentscope
             </p>
             <h1 className="text-4xl font-bold tracking-tight text-ink-900">
               Create your account

@@ -125,7 +125,7 @@ export default function B2BAnalyticsPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Quality signal</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Analytics not available yet</h2>
             <p className="mt-2 text-sm text-ink-500">Analytics will appear once resume analyses complete.</p>
-            <Link to={`/b2b/batches/${batch.id}`} className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">View Batch →</Link>
+            <Link to={`/b2b/batches/${batch.id}`} className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">View Batch <i className="fa-solid fa-arrow-right" /></Link>
           </div>
         )}
 

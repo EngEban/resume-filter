@@ -140,7 +140,7 @@ export default function HistoryPage() {
               <h3 className="mt-4 text-base font-semibold text-ink-900">No analyses yet</h3>
               <p className="mt-1 text-sm text-ink-500">Your resume analyses will appear here.</p>
               <Link to="/analyze" className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">
-                Analyze your first resume →
+                Analyze your first resume <i className="fa-solid fa-arrow-right" />
               </Link>
             </div>
           )}

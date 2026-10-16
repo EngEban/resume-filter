@@ -55,8 +55,8 @@ export default function B2CDashboardPage() {
       {/* Header */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Overview</p>
-        <h1 className="text-4xl font-bold tracking-tight text-ink-900">
-          Welcome back, {user?.email?.split('@')[0] ?? 'there'}
+          <h1 className="text-4xl font-bold tracking-tight text-ink-900">
+          Welcome back, {user?.display_name || user?.email?.split('@')[0] || 'there'}
         </h1>
         <p className="text-ink-600">Your resume analysis workspace.</p>
       </div>
@@ -90,7 +90,7 @@ export default function B2CDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Your workspace</p>
             <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink-900">Recent activity</h2>
           </div>
-          <Link to="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">View history →</Link>
+          <Link to="/history" className="text-sm font-medium text-brand-600 hover:text-brand-700">View history <i className="fa-solid fa-arrow-right" /></Link>
         </div>
 
         <div className="rounded-2xl border bg-white" style={{ borderColor: BORDER }}>
@@ -107,11 +107,11 @@ export default function B2CDashboardPage() {
 
           {loadState === 'ready' && analyses.length === 0 && (
             <div className="py-14 text-center">
-              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">📄</div>
+              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl"><i className="fa-solid fa-file-lines" /></div>
               <h3 className="mt-4 text-base font-semibold text-ink-900">No analyses yet</h3>
               <p className="mt-1 text-sm text-ink-500">Upload your first resume to see your results here.</p>
               <Link to="/analyze" className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">
-                Analyze your first resume →
+                Analyze your first resume <i className="fa-solid fa-arrow-right" />
               </Link>
             </div>
           )}

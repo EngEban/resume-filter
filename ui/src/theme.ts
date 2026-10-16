@@ -3,11 +3,23 @@
 // Design tokens for TalentScope.
 // ============================================================
 
-export const PRIMARY = '#4F46E5';
+export const PRIMARY = '#7C3AED';
 export const PRIMARY_DARK = '#4338CA';
 export const PRIMARY_LIGHT = '#EEF2FF';
 export const VIOLET = '#7C3AED';
 export const VIOLET_LIGHT = '#F5F3FF';
+
+export const PURPLE = '#7C3AED';
+export const PURPLE_LIGHT = '#A855F7';
+export const PURPLE_DARK = '#5B21B6';
+export const PINK = '#EC4899';
+export const PINK_LIGHT = '#F472B6';
+export const ORANGE = '#FB923C';
+export const ORANGE_LIGHT = '#FDBA74';
+export const BG_DARK = '#1F0A3D';
+export const GRADIENT_PRIMARY = 'linear-gradient(135deg, #7C3AED 0%, #A855F7 50%, #EC4899 100%)';
+export const GRADIENT_CTA = 'linear-gradient(135deg, #EC4899 0%, #F97316 100%)';
+export const GRADIENT_HERO = 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #EC4899 100%)';
 
 export const SUCCESS = '#10B981';
 export const SUCCESS_LIGHT = '#ECFDF5';

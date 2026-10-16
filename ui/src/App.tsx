@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 import AnalyzeResumePage from './pages/AnalyzeResumePage';
 import B2CDashboardPage from './pages/B2CDashboardPage';
@@ -24,6 +25,8 @@ import B2BDashboardPage from './pages/B2BDashboardPage';
 import B2BExportsPage from './pages/B2BExportsPage';
 import B2BResumeDetailsPage from './pages/B2BResumeDetailsPage';
 import B2BSettingsPage from './pages/B2BSettingsPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
+
 
 function App() {
   return (
@@ -32,6 +35,7 @@ function App() {
       <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
       <Route path="/login" element={<PublicLayout showHeader={false} showFooter={false}><LoginPage /></PublicLayout>} />
       <Route path="/register" element={<PublicLayout showHeader={false} showFooter={false}><RegisterPage /></PublicLayout>} />
+      <Route path="/verify-email" element={<PublicLayout showHeader={false} showFooter={false}><VerifyEmailPage /></PublicLayout>} />
 
       {/* B2C */}
       <Route path="/dashboard" element={<ProtectedRoute requiredAccountType="b2c"><AppLayout><B2CDashboardPage /></AppLayout></ProtectedRoute>} />
@@ -44,7 +48,7 @@ function App() {
       <Route path="/b2b/batches" element={<ProtectedRoute requiredAccountType="b2b"><B2BBatchesPage /></ProtectedRoute>} />
       <Route path="/b2b/batches/new" element={<ProtectedRoute requiredAccountType="b2b"><B2BNewBatchPage /></ProtectedRoute>} />
       <Route path="/b2b/batches/:batchId" element={<ProtectedRoute requiredAccountType="b2b"><B2BBatchDetailsPage /></ProtectedRoute>} />
-      <Route path="/b2b/batches/:batchId/analytics" element={<ProtectedRoute requiredAccountType="b2b"><B2BAnalyticsPage /></ProtectedRoute>} />
+      <Route path="/b2b/batches/:batchId/analytics" element={<ProtectedRoute requiredAccountType="b2b"><B2BAnalyticsPage /></ProtectedRoute>}/>
       <Route path="/b2b/batches/:batchId/compare" element={<ProtectedRoute requiredAccountType="b2b"><B2BComparePage /></ProtectedRoute>} />
       <Route path="/b2b/candidates" element={<ProtectedRoute requiredAccountType="b2b"><B2BCandidatesPage /></ProtectedRoute>} />
       <Route path="/b2b/analytics" element={<ProtectedRoute requiredAccountType="b2b"><B2BAnalyticsOverviewPage /></ProtectedRoute>} />
@@ -53,6 +57,7 @@ function App() {
       <Route path="/b2b/settings" element={<ProtectedRoute requiredAccountType="b2b"><B2BSettingsPage /></ProtectedRoute>} />
 
       <Route path="*" element={<PublicLayout><NotFoundPage /></PublicLayout>} />
+      <Route path="/auth/callback" element={<PublicLayout showHeader={false} showFooter={false}><AuthCallbackPage /></PublicLayout>} />
     </Routes>
   );
 }

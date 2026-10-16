@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.exception_handlers import register_exception_handlers
@@ -78,7 +79,15 @@ def create_app() -> FastAPI:
     app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
     # ---------- Middleware ----------
+    # Order matters: Starlette runs middleware in reverse order.
+    # We want RequestContext first, then Session, then CORS.
     app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.SESSION_SECRET,
+        same_site="lax",
+        https_only=False,  # change to True in production
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list if settings.DEBUG else [],

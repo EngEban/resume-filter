@@ -129,7 +129,7 @@ export default function B2BCandidatesPage() {
 
           {loadState === 'ready' && filtered.length === 0 && (
             <div className="py-16 text-center">
-              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">👥</div>
+              <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl"><i className="fa-solid fa-users" /></div>
               <h3 className="mt-4 text-base font-semibold text-ink-900">
                 {candidates.length === 0 ? 'No candidates yet' : 'No matching candidates'}
               </h3>

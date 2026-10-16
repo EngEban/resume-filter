@@ -3,7 +3,7 @@
 # ============================================================
 
 [project]
-name = "resume-filter"
+name = "TalentScope"
 version = "0.1.0"
 description = "AI-powered resume screening and ATS scoring system"
 readme = "README.md"

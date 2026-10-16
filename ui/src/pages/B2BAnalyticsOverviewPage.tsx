@@ -140,7 +140,7 @@ export default function B2BAnalyticsOverviewPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Activity</p>
                     <h2 className="mt-1 text-xl font-bold text-ink-900">Recent batches</h2>
                   </div>
-                  <Link to="/b2b/batches" className="text-sm font-medium text-brand-600 hover:text-brand-700">View all →</Link>
+                  <Link to="/b2b/batches" className="text-sm font-medium text-brand-600 hover:text-brand-700">View all <i className="fa-solid fa-arrow-right" /></Link>
                 </div>
                 <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
                   <div className="divide-y" style={{ borderColor: BORDER }}>

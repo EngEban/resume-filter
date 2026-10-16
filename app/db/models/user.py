@@ -2,10 +2,11 @@
 # app/db/models/user.py
 # User Model (both B2B and B2C)
 # ============================================================
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -39,6 +40,22 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # ---------- Email Verification ----------
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+    verification_token: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, index=True,
+    )
+    verification_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+
+    # ---------- Google OAuth ----------
+    google_id: Mapped[str | None] = mapped_column(
+        String(100), nullable=True, unique=True, index=True,
+    )
 
     # ---------- Tenant (nullable for B2C) ----------
     tenant_id: Mapped[UUID | None] = mapped_column(

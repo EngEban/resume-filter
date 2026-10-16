@@ -73,11 +73,11 @@ export default function B2BExportsPage() {
 
         {loadState === 'ready' && batches.length === 0 && (
           <div className="rounded-2xl border bg-white py-16 text-center" style={{ borderColor: BORDER }}>
-            <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl">📥</div>
+            <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl"><i className="fa-solid fa-download" /></div>
             <h3 className="mt-4 text-base font-semibold text-ink-900">No batches to export</h3>
             <p className="mt-1 text-sm text-ink-500">Create a batch first to enable exports.</p>
             <Link to="/b2b/batches" className="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-700">
-              Go to Batches →
+              Go to Batches <i className="fa-solid fa-arrow-right" />
             </Link>
           </div>
         )}
@@ -109,7 +109,7 @@ export default function B2BExportsPage() {
                         disabled={downloading === `${b.id}-xlsx`}
                         className="btn btn-secondary btn-sm hover-lift"
                       >
-                        {downloading === `${b.id}-xlsx` ? '…' : '📊 Excel'}
+                        {downloading === `${b.id}-xlsx` ? '…' : <><i className="fa-solid fa-chart-pie" /> Excel</>}
                       </button>
                       <button
                         type="button"
@@ -117,7 +117,7 @@ export default function B2BExportsPage() {
                         disabled={downloading === `${b.id}-pdf`}
                         className="btn btn-secondary btn-sm hover-lift"
                       >
-                        {downloading === `${b.id}-pdf` ? '…' : '📄 PDF'}
+                        {downloading === `${b.id}-pdf` ? '…' : <><i className="fa-solid fa-file-lines" /> PDF</>}
                       </button>
                     </div>
                   </div>
@@ -128,7 +128,7 @@ export default function B2BExportsPage() {
         )}
 
         <div className="rounded-2xl border bg-blue-50/40 p-5" style={{ borderColor: '#DBEAFE' }}>
-          <p className="text-sm font-semibold" style={{ color: PRIMARY }}>💡 About exports</p>
+          <p className="text-sm font-semibold" style={{ color: PRIMARY }}><i className="fa-solid fa-lightbulb" /> About exports</p>
           <ul className="mt-2 text-sm text-ink-600 space-y-1 list-disc list-inside">
             <li><strong>Excel</strong>: ranked list of all candidates with scores and matched/missing keywords.</li>
             <li><strong>PDF</strong>: full report with summary statistics and top candidates.</li>

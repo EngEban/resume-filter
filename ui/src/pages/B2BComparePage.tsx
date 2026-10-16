@@ -134,7 +134,7 @@ export default function B2BComparePage() {
 
                   <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: BORDER }}>
                     <span className={`badge ${c.status === 'completed' ? 'badge-success' : c.status === 'failed' ? 'badge-danger' : 'badge-info'}`}>{c.status}</span>
-                    <Link to={`/b2b/resumes/${c.id}`} className="text-xs font-semibold text-brand-600 hover:text-brand-700">View Resume →</Link>
+                    <Link to={`/b2b/resumes/${c.id}`} className="text-xs font-semibold text-brand-600 hover:text-brand-700">View Resume <i className="fa-solid fa-arrow-right" /></Link>
                   </div>
 
                   {c.missing_keywords && c.missing_keywords.length > 0 && (

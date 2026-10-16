@@ -68,6 +68,19 @@ class Settings(BaseSettings):
     # ---------- CORS ----------
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
+        # ---------- Email (Resend) ----------
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "onboarding@resend.dev"
+    EMAIL_FROM_NAME: str = "Talentscope"
+    APP_BASE_URL: str = "http://localhost:3000"
+
+        # ---------- Google OAuth ----------
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+    SESSION_SECRET: str = "change-me-in-production"
+
+    
     # ---------- Logging ----------
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False
