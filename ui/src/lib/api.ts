@@ -327,14 +327,6 @@ export interface TenantOverview {
   recent_batches: Batch[];
 }
 
-export interface LLMSettings {
-  provider: string;
-  model: string;
-  has_custom_key: boolean;
-  base_url: string | null;
-  source: string;
-}
-
 export const b2bApi = {
   async listBatches(params?: { search?: string; status?: string; limit?: number; offset?: number }): Promise<Batch[]> {
     const query = new URLSearchParams();
@@ -395,10 +387,6 @@ export const b2bApi = {
 
   async compare(batchId: string, limit = 5): Promise<{ candidates: Resume[] }> {
     return request('GET', `/api/v1/b2b/resumes/compare?batch_id=${batchId}&limit=${limit}`);
-  },
-
-  async getLLMSettings(): Promise<LLMSettings> {
-    return request<LLMSettings>('GET', '/api/v1/b2b/settings/llm');
   },
 
   async exportBatchExcel(batchId: string) {

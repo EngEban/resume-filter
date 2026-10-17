@@ -10,7 +10,6 @@ export function Footer() {
 
   return (
     <footer className="relative overflow-hidden border-t border-ink-200/50 bg-white">
-      {/* Decorative blob */}
       <img
         src="/images/hero/06_footer_decorative_blob_400x400.png"
         alt=""
@@ -122,12 +121,12 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="relative border-t border-ink-200/50 bg-ink-50/50">
-        <div className="mx-auto max-w-7xl px-6 py-5 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="mx-auto max-w-7xl px-6 py-6 lg:px-8">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
             <p className="text-xs text-ink-500">
               © {new Date().getFullYear()} Talentscope. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 text-xs text-ink-500">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-ink-500">
               <Link to="/contact" className="hover:text-brand-600">
                 Privacy
               </Link>
@@ -136,12 +135,12 @@ export function Footer() {
                 Terms
               </Link>
               <span className="text-ink-300">·</span>
-              <p>
+              <span>
                 Built by{' '}
                 <Link to="/about" className="font-semibold text-brand-600 hover:text-brand-700">
                   Eban Tbail
                 </Link>
-              </p>
+              </span>
             </div>
           </div>
         </div>
@@ -150,9 +149,6 @@ export function Footer() {
   );
 }
 
-// ============================================================
-// Social Links — colored brand icons
-// ============================================================
 function SocialLinks() {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -180,12 +176,6 @@ function SocialLinks() {
         className="bg-[#0A66C2] hover:bg-[#0856A8]"
         icon="fa-brands fa-linkedin-in"
       />
-      <SocialButton
-        href="mailto:ebantbaeil2004@gmail.com"
-        label="Email"
-        className="bg-brand-600 hover:bg-brand-700"
-        icon="fa-solid fa-envelope"
-      />
     </div>
   );
 }
@@ -208,9 +198,10 @@ function SocialButton({
       rel="noopener noreferrer"
       aria-label={label}
       title={label}
-      className={`grid h-9 w-9 place-items-center rounded-full text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${className}`}
+      className={`grid h-10 w-10 place-items-center rounded-full shadow-md transition-all hover:-translate-y-1 hover:shadow-lg ${className}`}
+      style={{ color: '#ffffff' }}
     >
-      <i className={`${icon} text-sm`} />
+      <i className={`${icon} text-base`} style={{ color: '#ffffff' }} />
     </a>
   );
 }

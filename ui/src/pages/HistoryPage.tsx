@@ -1,4 +1,3 @@
-\
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { b2cApi, APIError, type AnalysisHistoryItem } from '@/lib/api';

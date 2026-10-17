@@ -144,7 +144,7 @@ function B2BNav() {
 
       <SectionLabel>Organization</SectionLabel>
       <div className="space-y-1">
-        <NavItem to="/b2b/settings" label="AI Settings" icon={icons.settings} />
+        <NavItem to="/b2b/settings" label="Settings" icon={icons.settings} />
       </div>
     </>
   );

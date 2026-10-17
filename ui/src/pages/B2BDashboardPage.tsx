@@ -114,8 +114,8 @@ export default function B2BDashboardPage() {
               />
               <ActionCard
                 iconClass="fa-solid fa-gear"
-                title="AI Settings"
-                description="Connect your own LLM provider."
+                title="Settings"
+                description="Manage organization access and account details."
                 target="/b2b/settings"
               />
               <ActionCard

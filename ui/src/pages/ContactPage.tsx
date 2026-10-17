@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Logo } from '@/components/Logo';
 
 const WHATSAPP_NUMBER = '970592630530';
 const EMAIL = 'ebantbaeil2004@gmail.com';
