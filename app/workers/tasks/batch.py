@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.workers.celery_app import celery_app
 from app.workers.tasks.resume import process_resume, validate_storage_path
+from app.db.models.batch import Batch  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
