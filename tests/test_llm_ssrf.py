@@ -1,11 +1,12 @@
 from types import SimpleNamespace
+
 import pytest
+
 from app import providers as providers_module
 from app.core.config import settings as app_settings
 from app.providers import resolve_llm_config
 from app.providers import unified_provider as provider_module
 from app.providers.unified_provider import ResolvedLLMConfig, validate_platform_llm_endpoint
-
 
 def _public_dns(_hostname, port, **_kwargs):
     return [(2, 1, 6, "", ("93.184.216.34", port))]
