@@ -1,8 +1,5 @@
 from types import SimpleNamespace
-
 import pytest
-from fastapi import HTTPException
-
 from app import providers as providers_module
 from app.core.config import settings as app_settings
 from app.providers import resolve_llm_config

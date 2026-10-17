@@ -124,7 +124,7 @@ def test_resume_loader_rejects_storage_path_outside_verified_prefix():
 
 
 def test_batch_loader_rejects_task_tenant_mismatch():
-    tenant_id, batch_id, _resume_id, _storage_path_value, batch, resume, tenant = _worker_records()
+    _tenant_id, batch_id, _resume_id, _storage_path_value, batch, resume, tenant = _worker_records()
     session = FakeWorkerSession(batch=batch, resume=resume, tenant=tenant)
 
     with pytest.raises(ValueError, match="does not own"):

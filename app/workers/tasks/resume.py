@@ -121,7 +121,7 @@ async def _process_resume_async(
 
     # --- Validate and claim the resume before doing external work ---
     with Session(_sync_engine) as session:
-        resume, batch, tenant = _load_verified_resume(
+        resume, batch, _tenant = _load_verified_resume(
             session,
             batch_id=batch_id,
             resume_id=resume_id,

@@ -27,7 +27,6 @@ _sync_engine = create_engine(_sync_db_url(), pool_pre_ping=True)
 
 def _load_verified_batch(session: Session, batch_id: str, tenant_id: str | None = None):
     """Load a batch and optionally verify the tenant carried by the task."""
-    from app.db.models.batch import Batch
 
     try:
         batch_uuid = UUID(batch_id)
