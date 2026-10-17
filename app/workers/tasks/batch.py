@@ -110,7 +110,6 @@ def process_batch(self, batch_id: str, tenant_id: str | None = None) -> dict:
 @celery_app.task(name="tasks.finalize_batch")
 def finalize_batch(results: list, batch_id: str, tenant_id: str | None = None) -> dict:
     """Chord callback: runs once every resume subtask has finished."""
-    from app.db.models.batch import Batch
     from app.db.models.resume import Resume
 
     with Session(_sync_engine) as session:
