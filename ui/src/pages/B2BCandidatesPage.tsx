@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, type Batch, type Resume } from '@/lib/api';
-import { BORDER, DANGER, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
+import { DANGER, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
 
 type CandidateRow = Resume & { batch_id: string; batch_title: string };
 type LoadState = 'loading' | 'ready' | 'error';
@@ -76,11 +76,11 @@ export default function B2BCandidatesPage() {
       <div className="space-y-8 page-enter">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Organization workspace</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Candidates</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Candidates</h1>
           <p className="text-ink-600">All candidates across your batches.</p>
         </div>
 
-        <div className="flex flex-col gap-2 rounded-2xl border bg-white p-3 sm:flex-row sm:items-center" style={{ borderColor: BORDER }}>
+        <div className="flex flex-col gap-2 rounded-2xl border border-ink-100 bg-white/80 p-3 shadow-soft-md backdrop-blur-sm sm:flex-row sm:items-center">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -111,7 +111,7 @@ export default function B2BCandidatesPage() {
           </select>
         </div>
 
-        <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
+        <div className="overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft-lg">
           {loadState === 'loading' && (
             <div className="space-y-3 p-5">
               {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-16 skeleton" />)}
@@ -142,8 +142,8 @@ export default function B2BCandidatesPage() {
           )}
 
           {loadState === 'ready' && filtered.length > 0 && (
-            <div className="divide-y" style={{ borderColor: BORDER }}>
-              <div className="hidden lg:grid grid-cols-[1.5fr_1.2fr_100px_120px_160px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: TEXT_MUTED, borderBottom: `1px solid ${BORDER}` }}>
+            <div className="divide-y divide-ink-100">
+              <div className="hidden bg-ink-50 text-ink-500 lg:grid grid-cols-[1.5fr_1.2fr_100px_120px_160px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                 <span>Candidate</span>
                 <span>Email</span>
                 <span>Score</span>

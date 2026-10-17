@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, APIError, type Batch, type Resume } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED, WARNING, scoreLevel, levelColor } from '@/theme';
+import { DANGER, PRIMARY, SUCCESS, TEXT_MUTED, TEXT_PRIMARY, WARNING, scoreLevel, levelColor } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type ExportType = 'xlsx' | 'pdf';
@@ -133,7 +133,7 @@ export default function B2BBatchDetailsPage() {
     return (
       <B2BShell>
         <div className="py-24 text-center">
-          <h1 className="text-2xl font-bold text-ink-900">Unable to load batch</h1>
+          <h1 className="font-display text-2xl font-bold text-ink-900">Unable to load batch</h1>
           <button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-6">Try Again</button>
         </div>
       </B2BShell>
@@ -144,7 +144,7 @@ export default function B2BBatchDetailsPage() {
     return (
       <B2BShell>
         <div className="py-24 text-center">
-          <h1 className="text-2xl font-bold text-ink-900">Batch not found</h1>
+          <h1 className="font-display text-2xl font-bold text-ink-900">Batch not found</h1>
           <Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link>
         </div>
       </B2BShell>
@@ -167,7 +167,7 @@ export default function B2BBatchDetailsPage() {
         <div className="flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
           <div className="min-w-0 space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Batch details</p>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900 break-words">{batch.job_title}</h1>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900 break-words">{batch.job_title}</h1>
             <p className="text-sm" style={{ color: TEXT_MUTED }}>
               Created {formatDate(batch.created_at)} · {batch.total_resumes} resumes · {batch.id.slice(0, 8)}
             </p>
@@ -200,7 +200,7 @@ export default function B2BBatchDetailsPage() {
         </div>
 
         {/* Progress */}
-        <div className="signal-ring rounded-[24px] border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+        <div className="signal-ring rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Processing progress</p>
@@ -211,7 +211,7 @@ export default function B2BBatchDetailsPage() {
             <span className="text-2xl font-bold text-brand-600 tabular-nums">{progress}%</span>
           </div>
           <div className="mt-4 h-2 rounded-full bg-ink-100 overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${PRIMARY}, #7C3AED)` }} />
+            <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -219,11 +219,11 @@ export default function B2BBatchDetailsPage() {
         <section className="space-y-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Candidate results</p>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink-900">Resumes in this batch</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink-900">Resumes in this batch</h2>
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col gap-2 rounded-2xl border bg-white p-3 sm:flex-row sm:items-center" style={{ borderColor: BORDER }}>
+          <div className="flex flex-col gap-2 rounded-2xl border border-ink-100 bg-white/80 p-3 shadow-soft-md backdrop-blur-sm sm:flex-row sm:items-center">
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search resumes…" className="input flex-1" />
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input sm:w-40">
               <option value="">All statuses</option>
@@ -241,14 +241,14 @@ export default function B2BBatchDetailsPage() {
             </select>
           </div>
 
-          <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
+          <div className="overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft-lg">
             {resumes.length === 0 ? (
               <div className="py-16 text-center">
                 <p className="text-sm text-ink-500">No resumes match the filters.</p>
               </div>
             ) : (
-              <div className="divide-y" style={{ borderColor: BORDER }}>
-                <div className="hidden lg:grid grid-cols-[1.6fr_120px_140px_140px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: TEXT_MUTED, borderBottom: `1px solid ${BORDER}` }}>
+              <div className="divide-y divide-ink-100">
+                <div className="hidden bg-ink-50 text-ink-500 lg:grid grid-cols-[1.6fr_120px_140px_140px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                   <span>Candidate / File</span>
                   <span>Score</span>
                   <span>Status</span>
@@ -294,9 +294,9 @@ export default function B2BBatchDetailsPage() {
 
 function Metric({ label, value, color }: { label: string; value: number | string; color?: string }) {
   return (
-    <div className="rounded-2xl border bg-white p-5 hover-lift" style={{ borderColor: BORDER }}>
-      <p className="text-xs font-medium" style={{ color: TEXT_MUTED }}>{label}</p>
-      <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums" style={{ color: color ?? '#0F172A' }}>{value}</p>
+    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft-md hover-lift">
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="mt-3 font-display text-2xl font-bold tracking-tight tabular-nums" style={{ color: color ?? TEXT_PRIMARY }}>{value}</p>
     </div>
   );
 }

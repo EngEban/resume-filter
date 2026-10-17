@@ -404,4 +404,11 @@ export const b2bApi = {
   async exportComparison(batchId: string, limit = 10) {
     return fetchBlob(`/api/v1/b2b/resumes/compare/export.xlsx?batch_id=${batchId}&limit=${limit}`);
   },
+    async deleteBatch(id: string): Promise<{ message: string; id: string; deleted_resumes: number }> {
+    return request('DELETE', `/api/v1/b2b/batches/${id}`);
+  },
+
+  async clearAllBatches(): Promise<{ message: string; deleted_batches: number; deleted_resumes: number }> {
+    return request('DELETE', '/api/v1/b2b/batches');
+  },
 };

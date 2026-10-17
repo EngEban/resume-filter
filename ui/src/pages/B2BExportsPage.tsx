@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, type Batch } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, TEXT_MUTED } from '@/theme';
+import { DANGER, TEXT_MUTED } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -55,7 +55,7 @@ export default function B2BExportsPage() {
       <div className="space-y-8 page-enter">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Data center</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Exports</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Exports</h1>
           <p className="text-ink-600">Download your batch results in Excel or PDF format.</p>
         </div>
 
@@ -66,13 +66,13 @@ export default function B2BExportsPage() {
         )}
 
         {loadState === 'error' && (
-          <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white p-8 text-center shadow-soft-md">
             <p className="text-sm" style={{ color: DANGER }}>Unable to load batches.</p>
           </div>
         )}
 
         {loadState === 'ready' && batches.length === 0 && (
-          <div className="rounded-2xl border bg-white py-16 text-center" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white py-16 text-center shadow-soft-md">
             <div className="mx-auto h-12 w-12 rounded-xl bg-brand-50 grid place-items-center text-2xl"><i className="fa-solid fa-download" /></div>
             <h3 className="mt-4 text-base font-semibold text-ink-900">No batches to export</h3>
             <p className="mt-1 text-sm text-ink-500">Create a batch first to enable exports.</p>
@@ -83,9 +83,9 @@ export default function B2BExportsPage() {
         )}
 
         {loadState === 'ready' && batches.length > 0 && (
-          <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
-            <div className="divide-y" style={{ borderColor: BORDER }}>
-              <div className="hidden lg:grid grid-cols-[1.5fr_120px_120px_280px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: TEXT_MUTED, borderBottom: `1px solid ${BORDER}` }}>
+          <div className="overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft-lg">
+            <div className="divide-y divide-ink-100">
+              <div className="hidden bg-ink-50 text-ink-500 lg:grid grid-cols-[1.5fr_120px_120px_280px] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                 <span>Batch</span>
                 <span>Resumes</span>
                 <span>Date</span>
@@ -127,8 +127,8 @@ export default function B2BExportsPage() {
           </div>
         )}
 
-        <div className="rounded-2xl border bg-blue-50/40 p-5" style={{ borderColor: '#DBEAFE' }}>
-          <p className="text-sm font-semibold" style={{ color: PRIMARY }}><i className="fa-solid fa-lightbulb" /> About exports</p>
+        <div className="rounded-2xl border border-brand-100 bg-brand-50/50 p-5 shadow-soft-sm">
+          <p className="text-sm font-semibold text-brand-700"><i className="fa-solid fa-lightbulb" /> About exports</p>
           <ul className="mt-2 text-sm text-ink-600 space-y-1 list-disc list-inside">
             <li><strong>Excel</strong>: ranked list of all candidates with scores and matched/missing keywords.</li>
             <li><strong>PDF</strong>: full report with summary statistics and top candidates.</li>

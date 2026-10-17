@@ -17,10 +17,10 @@ function NavItem({ to, label, icon, end }: NavItemProps) {
       end={end}
       className={({ isActive }) =>
         [
-          'group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+          'group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors duration-200',
           isActive
-            ? 'bg-white/12 text-white shadow-sm'
-            : 'text-slate-300 hover:bg-white/8 hover:text-white hover:translate-x-0.5',
+            ? 'bg-brand-50 text-brand-700 font-semibold'
+            : 'text-ink-600 hover:bg-ink-50 hover:text-ink-900',
         ].join(' ')
       }
     >
@@ -101,7 +101,7 @@ const icons = {
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <p
-      className="px-3.5 pt-6 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500"
+      className="px-3.5 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-400"
     >
       {children}
     </p>
@@ -161,12 +161,12 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="relative z-40 w-full shrink-0 border-b border-slate-800 bg-ink-950 text-white md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r">
-      <div className="flex h-[68px] items-center justify-between border-b border-white/10 px-4 sm:px-5">
-        <Logo size="md" variant="light" />
+    <aside className="relative z-40 w-full shrink-0 border-b border-ink-100 bg-white text-ink-900 shadow-soft-sm md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r">
+      <div className="flex h-[68px] items-center justify-between border-b border-ink-100 px-4 sm:px-5">
+        <Logo size="md" variant="dark" />
         <button
           type="button"
-          className="grid h-10 w-10 place-items-center rounded-xl text-slate-300 hover:bg-white/10 hover:text-white md:hidden"
+          className="grid h-10 w-10 place-items-center rounded-xl text-ink-600 hover:bg-ink-50 hover:text-ink-900 md:hidden"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls="workspace-navigation"
@@ -179,31 +179,31 @@ export function Sidebar() {
       <nav
         id="workspace-navigation"
         onClick={() => setOpen(false)}
-        className={`${open ? 'flex' : 'hidden'} absolute left-0 right-0 top-[68px] max-h-[calc(100vh-68px)] flex-col overflow-y-auto border-b border-white/10 bg-ink-950 px-3 pb-4 shadow-2xl md:static md:flex md:h-[calc(100vh-68px)] md:max-h-none md:border-0 md:shadow-none`}
+        className={`${open ? 'flex' : 'hidden'} absolute left-0 right-0 top-[68px] max-h-[calc(100vh-68px)] flex-col overflow-y-auto border-b border-ink-100 bg-white px-3 pb-4 shadow-soft-lg md:static md:flex md:h-[calc(100vh-68px)] md:max-h-none md:border-0 md:shadow-none`}
       >
-        <div className="mb-2 mt-4 rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-300">Workspace</p>
-          <p className="mt-1 truncate text-sm font-semibold text-white">
+        <div className="mb-2 mt-4 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-pink-50/50 px-3.5 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-600">Workspace</p>
+          <p className="mt-1 truncate text-sm font-semibold text-ink-900">
             {user?.account_type === 'b2b' ? 'Organization intelligence' : 'Personal intelligence'}
           </p>
         </div>
         {user?.account_type === 'b2b' ? <B2BNav /> : <B2CNav />}
 
-        <div className="mt-auto border-t border-white/10 pt-3">
-          <div className="mb-2 flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-sm font-semibold text-white ring-1 ring-white/20">
+        <div className="mt-auto border-t border-ink-100 pt-3">
+          <div className="mb-2 flex items-center gap-3 rounded-xl bg-ink-50 px-3 py-2.5">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full gradient-primary text-sm font-semibold text-white shadow-soft-sm">
             {(user?.email?.[0] ?? 'U').toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-white">{user?.email ?? 'User'}</p>
-              <p className="text-xs uppercase tracking-wide text-slate-500">{user?.account_type ?? ''}</p>
+              <p className="truncate text-sm font-medium text-ink-900">{user?.email ?? 'User'}</p>
+              <p className="text-xs uppercase tracking-wide text-ink-500">{user?.account_type ?? ''}</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-300 transition-all duration-150 hover:bg-red-500/10 hover:text-red-300"
+            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-600 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
           >
             {icons.logout}
             <span>Sign out</span>

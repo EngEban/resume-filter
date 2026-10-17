@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { useAuth } from '@/contexts/AuthContext';
 import { b2bApi, type TenantOverview } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED } from '@/theme';
+import { DANGER, LEVEL_COLORS, PRIMARY, SUCCESS, TEXT_MUTED, TEXT_PRIMARY } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -38,23 +38,23 @@ export default function B2BDashboardPage() {
         {/* Header */}
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Organization workspace</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">
             Welcome back{user?.display_name ? `, ${user.display_name}` : ''}
           </h1>
           <p className="text-ink-600">Your recruiting intelligence workspace.</p>
         </div>
 
         {/* Primary CTA */}
-        <div className="relative overflow-hidden rounded-[26px] p-8 text-white animate-fade-in-up" style={{ background: `linear-gradient(135deg, ${PRIMARY} 0%, #312E81 100%)` }}>
+        <div className="relative overflow-hidden rounded-3xl gradient-hero p-8 text-white shadow-soft-xl animate-fade-in-up">
           <div aria-hidden className="absolute -right-20 -top-24 h-80 w-80 rounded-full border border-white/15" />
           <div aria-hidden className="absolute right-8 top-8 h-44 w-44 rounded-full border border-white/10" />
           <div className="max-w-lg space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Next best action</p>
-            <h2 className="text-2xl font-bold">Create a resume batch</h2>
+            <h2 className="font-display text-2xl font-bold text-white">Create a resume batch</h2>
             <p className="text-sm text-white/85">
               Upload resumes for a job and get a ranked shortlist with ATS scores.
             </p>
-            <Link to="/b2b/batches" className="inline-flex mt-2 h-11 items-center rounded-xl bg-white px-6 text-sm font-semibold text-brand-700 hover:bg-white/90 transition">
+            <Link to="/b2b/batches" className="btn btn-secondary mt-2 border-white/70 bg-white text-brand-700 hover:bg-white/90 hover:text-brand-700">
               Go to Batches
             </Link>
           </div>
@@ -68,7 +68,7 @@ export default function B2BDashboardPage() {
         )}
 
         {loadState === 'error' && (
-          <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white p-6 text-center shadow-soft-md">
             <p className="text-sm" style={{ color: DANGER }}>Unable to load overview.</p>
           </div>
         )}
@@ -139,8 +139,8 @@ export default function B2BDashboardPage() {
                   </Link>
                 </div>
 
-                <div className="rounded-2xl border bg-white overflow-hidden" style={{ borderColor: BORDER }}>
-                  <div className="divide-y" style={{ borderColor: BORDER }}>
+                <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-soft-md">
+                  <div className="divide-y divide-ink-100">
                     {overview.recent_batches.slice(0, 5).map((b) => (
                       <Link
                         key={b.id}
@@ -169,16 +169,16 @@ export default function B2BDashboardPage() {
 
             {/* Distribution */}
             {distTotal > 0 && (
-              <section className="rounded-2xl border bg-white p-6" style={{ borderColor: BORDER }}>
+              <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Quality signal</p>
                 <h2 className="mt-1 text-xl font-bold text-ink-900">Company-wide score distribution</h2>
                 <div className="mt-6 space-y-4">
                   {[
-                    { key: 'excellent' as const, label: 'Excellent (90-100)', color: '#15803D' },
-                    { key: 'good' as const, label: 'Good (75-89)', color: '#16A34A' },
-                    { key: 'average' as const, label: 'Average (60-74)', color: '#F59E0B' },
-                    { key: 'below_average' as const, label: 'Below avg (40-59)', color: '#EA580C' },
-                    { key: 'weak' as const, label: 'Weak (0-39)', color: '#DC2626' },
+                    { key: 'excellent' as const, label: 'Excellent (90-100)', color: LEVEL_COLORS.excellent },
+                    { key: 'good' as const, label: 'Good (75-89)', color: LEVEL_COLORS.good },
+                    { key: 'average' as const, label: 'Average (60-74)', color: LEVEL_COLORS.average },
+                    { key: 'below_average' as const, label: 'Below avg (40-59)', color: LEVEL_COLORS.below_average },
+                    { key: 'weak' as const, label: 'Weak (0-39)', color: LEVEL_COLORS.weak },
                   ].map((row) => {
                     const count = overview.score_distribution[row.key] ?? 0;
                     const pct = Math.round((count / distTotal) * 100);
@@ -206,9 +206,9 @@ export default function B2BDashboardPage() {
 
 function Stat({ label, value, color }: { label: string; value: number | string; color?: string }) {
   return (
-    <div className="rounded-[20px] border bg-white p-5 hover-lift" style={{ borderColor: BORDER }}>
-      <p className="text-xs font-medium" style={{ color: TEXT_MUTED }}>{label}</p>
-      <p className="mt-3 text-3xl font-bold tracking-tight tabular-nums" style={{ color: color ?? '#0F172A' }}>{value}</p>
+    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft-md transition-all hover:-translate-y-1">
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="mt-3 font-display text-3xl font-bold tracking-tight tabular-nums" style={{ color: color ?? TEXT_PRIMARY }}>{value}</p>
     </div>
   );
 }
@@ -217,8 +217,7 @@ function ActionCard({ iconClass, title, description, target }: { iconClass: stri
   return (
     <Link
       to={target}
-      className="block rounded-2xl border bg-white p-5 card-interactive hover-lift"
-      style={{ borderColor: BORDER }}
+      className="block rounded-2xl border border-ink-100 bg-white p-5 shadow-soft-md card-interactive hover-lift"
     >
       <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-lg">
         <i className={iconClass} />

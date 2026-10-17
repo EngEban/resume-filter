@@ -38,8 +38,8 @@ export default function AuthCallbackPage() {
   }, [params, login, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ink-50 p-6">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-ink-200 bg-white p-8 shadow-card text-center">
+    <div className="gradient-hero flex min-h-screen items-center justify-center p-6 page-enter">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-white/30 bg-white/95 p-8 text-center shadow-soft-xl backdrop-blur-sm">
         <div className="flex justify-center">
           <Logo size="md" to="/" />
         </div>

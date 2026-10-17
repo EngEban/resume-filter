@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, APIError, type Resume } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
+import { DANGER, PRIMARY, SUCCESS, TEXT_MUTED, WARNING, levelColor, scoreLevel } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -63,11 +63,11 @@ export default function B2BResumeDetailsPage() {
   }
 
   if (loadState === 'error') {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Unable to load resume</h1><button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-6">Try Again</button></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Unable to load resume</h1><button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-6">Try Again</button></div></B2BShell>;
   }
 
   if (notFound || !report) {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Resume not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Resume not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
   }
 
   const hasScore = typeof report.ats_score === 'number';
@@ -89,7 +89,7 @@ export default function B2BResumeDetailsPage() {
         <div className="flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
           <div className="min-w-0 space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Candidate report</p>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900 break-words">{report.candidate_name || 'Unnamed candidate'}</h1>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900 break-words">{report.candidate_name || 'Unnamed candidate'}</h1>
             <p className="text-sm" style={{ color: TEXT_MUTED }}>{report.file_name} · {formatDate(report.created_at)}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -102,17 +102,17 @@ export default function B2BResumeDetailsPage() {
         </div>
 
         {report.status === 'failed' && (
-          <div className="rounded-2xl border bg-red-50 px-5 py-4" style={{ borderColor: '#FECACA' }}>
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 shadow-soft-sm">
             <p className="text-sm font-semibold" style={{ color: DANGER }}>This analysis did not complete.</p>
             {report.error_message && <p className="mt-1 text-xs text-red-700">{report.error_message}</p>}
           </div>
         )}
 
         <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
-          <section className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Candidate information</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Resume overview</h2>
-            <dl className="mt-6 divide-y" style={{ borderColor: BORDER }}>
+            <dl className="mt-6 divide-y divide-ink-100">
               <Row label="Email" value={report.candidate_email ?? '—'} />
               <Row label="Phone" value={report.candidate_phone ?? '—'} />
               <Row label="Status" value={report.status} />
@@ -120,7 +120,7 @@ export default function B2BResumeDetailsPage() {
             </dl>
           </section>
 
-          <section className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Analysis signal</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Score breakdown</h2>
             {entries.length > 0 ? (
@@ -147,13 +147,13 @@ export default function B2BResumeDetailsPage() {
         </div>
 
         <div className="grid gap-5 xl:grid-cols-2">
-          <section className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Improvement signal</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Missing keywords</h2>
             {missing.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 {missing.map((k) => (
-                  <span key={k} className="px-2.5 py-1.5 rounded-lg text-xs font-medium" style={{ background: '#FEF2F2', color: DANGER }}>{k}</span>
+                  <span key={k} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700">{k}</span>
                 ))}
               </div>
             ) : (
@@ -161,7 +161,7 @@ export default function B2BResumeDetailsPage() {
             )}
           </section>
 
-          <section className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Next signals</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Suggestions</h2>
             {suggestions.length > 0 ? (
@@ -171,7 +171,7 @@ export default function B2BResumeDetailsPage() {
                   const desc = typeof obj.description === 'string' ? obj.description : '';
                   const type = typeof obj.type === 'string' ? obj.type : '';
                   const priority = typeof obj.priority === 'string' ? obj.priority : '';
-                  const color = priority === 'high' ? DANGER : priority === 'low' ? SUCCESS : '#F59E0B';
+                  const color = priority === 'high' ? DANGER : priority === 'low' ? SUCCESS : WARNING;
                   return (
                     <div key={i} className="border-l-2 pl-3" style={{ borderColor: color }}>
                       {type && <p className="text-xs font-semibold uppercase tracking-wider" style={{ color }}>{type}</p>}

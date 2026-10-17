@@ -19,6 +19,7 @@ export default function B2CDashboardPage() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [refreshKey, setRefreshKey] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<AnalysisHistoryItem | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -38,8 +39,8 @@ export default function B2CDashboardPage() {
   }, [refreshKey]);
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this analysis?')) return;
     setDeletingId(id);
+    setConfirmDelete(null);
     try {
       await b2cApi.deleteAnalysis(id);
       setAnalyses((prev) => prev.filter((a) => a.id !== id));
@@ -66,7 +67,6 @@ export default function B2CDashboardPage() {
 
   return (
     <div className="space-y-8 page-enter">
-      {/* Header */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Overview</p>
         <h1 className="text-4xl font-bold tracking-tight text-ink-900">
@@ -75,7 +75,6 @@ export default function B2CDashboardPage() {
         <p className="text-ink-600">Your resume analysis workspace.</p>
       </div>
 
-      {/* CTA */}
       <div className="relative overflow-hidden rounded-[26px] p-8 text-white animate-fade-in-up" style={{ background: `linear-gradient(135deg, ${PRIMARY} 0%, #312E81 100%)` }}>
         <div aria-hidden className="absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/15" />
         <div aria-hidden className="absolute -right-4 -top-12 h-52 w-52 rounded-full border border-white/10" />
@@ -89,7 +88,6 @@ export default function B2CDashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Analyses" value={loadState === 'loading' ? '…' : analyses.length} caption="Recorded in history" />
         <Stat label="This month" value={loadState === 'loading' ? '…' : thisMonthCount} caption="From available history" />
@@ -97,7 +95,6 @@ export default function B2CDashboardPage() {
         <Stat label="Status" value="Active" caption="Account is enabled" color={VIOLET} />
       </div>
 
-      {/* Recent activity */}
       <div className="space-y-4">
         <div className="flex items-end justify-between">
           <div>
@@ -119,11 +116,7 @@ export default function B2CDashboardPage() {
           {loadState === 'error' && (
             <div className="py-12 text-center text-sm text-ink-500">
               <p>Unable to load your activity.</p>
-              <button
-                type="button"
-                onClick={() => setRefreshKey((value) => value + 1)}
-                className="mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700"
-              >
+              <button type="button" onClick={() => setRefreshKey((value) => value + 1)} className="mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700">
                 Try again
               </button>
             </div>
@@ -147,18 +140,11 @@ export default function B2CDashboardPage() {
               {analyses.slice(0, 5).map((a) => {
                 const isDeleting = deletingId === a.id;
                 return (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-brand-50/40 transition-colors"
-                  >
+                  <div key={a.id} className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-brand-50/40 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="h-10 w-10 rounded-xl bg-brand-50 grid place-items-center text-sm font-semibold text-brand-700">
-                        CV
-                      </span>
+                      <span className="h-10 w-10 rounded-xl bg-brand-50 grid place-items-center text-sm font-semibold text-brand-700">CV</span>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-ink-900">
-                          Analysis · {a.id.slice(0, 8)}
-                        </p>
+                        <p className="truncate text-sm font-medium text-ink-900">Analysis · {a.id.slice(0, 8)}</p>
                         <p className="text-xs text-ink-500">{formatDate(a.created_at)}</p>
                       </div>
                     </div>
@@ -169,17 +155,12 @@ export default function B2CDashboardPage() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleDelete(a.id)}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDelete(a); }}
                         disabled={isDeleting}
                         className="grid h-8 w-8 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
                         title="Delete"
-                        aria-label="Delete analysis"
                       >
-                        {isDeleting ? (
-                          <i className="fa-solid fa-spinner fa-spin text-xs" />
-                        ) : (
-                          <i className="fa-solid fa-trash-can text-xs" />
-                        )}
+                        {isDeleting ? <i className="fa-solid fa-spinner fa-spin text-xs" /> : <i className="fa-solid fa-trash-can text-xs" />}
                       </button>
                     </div>
                   </div>
@@ -189,6 +170,31 @@ export default function B2CDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Custom Delete Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-ink-100 bg-white p-6 shadow-elevated animate-scale-in">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-red-100 text-red-600">
+              <i className="fa-solid fa-triangle-exclamation text-2xl" />
+            </div>
+            <h2 className="mt-4 text-center font-display text-xl font-bold text-ink-900">
+              Delete this analysis?
+            </h2>
+            <p className="mt-2 text-center text-sm text-ink-600">
+              Analysis <strong>#{confirmDelete.id.slice(0, 8)}</strong> will be permanently deleted. This action cannot be undone.
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setConfirmDelete(null)} disabled={deletingId !== null} className="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="button" onClick={() => handleDelete(confirmDelete.id)} disabled={deletingId !== null} className="btn bg-red-600 text-white hover:bg-red-700">
+                {deletingId !== null ? <><i className="fa-solid fa-spinner fa-spin text-xs" /> Deleting...</> : <><i className="fa-solid fa-trash-can text-xs" /> Delete</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

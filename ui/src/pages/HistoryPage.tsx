@@ -95,7 +95,7 @@ export default function HistoryPage() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Your workspace</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Analysis History</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Analysis History</h1>
           <p className="text-ink-600">Review your previous resume analyses and results.</p>
         </div>
         <div className="flex gap-2">
@@ -117,7 +117,7 @@ export default function HistoryPage() {
       </div>
 
       {/* Filters */}
-      <section className="rounded-2xl border bg-white p-4 sm:p-5" style={{ borderColor: BORDER }}>
+      <section className="rounded-2xl border border-ink-100 bg-white/80 p-4 shadow-soft-md backdrop-blur-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1 space-y-1.5">
             <label htmlFor="history-search" className="label">Search analyses</label>
@@ -158,7 +158,7 @@ export default function HistoryPage() {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
+        <div className="overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft-lg">
           {loadState === 'loading' && (
             <div className="space-y-3 p-5">
               {[1, 2, 3, 4].map((i) => <div key={i} className="h-[74px] skeleton" />)}
@@ -206,7 +206,7 @@ export default function HistoryPage() {
           )}
 
           {loadState === 'ready' && visible.length > 0 && (
-            <div className="divide-y" style={{ borderColor: BORDER }}>
+            <div className="divide-y divide-ink-100">
               {visible.map((item) => {
                 const status = getStatus(item);
                 const isExpanded = expandedId === item.id;
@@ -250,7 +250,7 @@ export default function HistoryPage() {
                           type="button"
                           onClick={() => handleDelete(item.id)}
                           disabled={isDeleting}
-                          className="grid h-8 w-8 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
+                          className="rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
                           title="Delete analysis"
                           aria-label="Delete analysis"
                         >
@@ -299,7 +299,7 @@ export default function HistoryPage() {
 
       {/* Clear All Modal */}
       {showClearModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/60 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-md rounded-3xl border border-ink-100 bg-white p-6 shadow-elevated animate-scale-in">
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-red-100 text-red-600">
               <i className="fa-solid fa-triangle-exclamation text-2xl" />

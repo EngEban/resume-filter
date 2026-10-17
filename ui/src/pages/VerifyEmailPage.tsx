@@ -42,8 +42,8 @@ export default function VerifyEmailPage() {
   }, [params]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ink-50 p-6 page-enter">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-ink-200 bg-white p-8 shadow-card">
+    <div className="gradient-hero flex min-h-screen items-center justify-center p-6 page-enter">
+      <div className="w-full max-w-md space-y-8 rounded-3xl border border-white/30 bg-white/95 p-8 shadow-soft-xl backdrop-blur-sm">
         <div className="flex justify-center">
           <Logo size="md" to="/" />
         </div>
@@ -57,10 +57,10 @@ export default function VerifyEmailPage() {
 
         {state === 'success' && (
           <div className="text-center space-y-4">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-green-100 text-3xl">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-3xl text-emerald-600">
               <i className="fa-solid fa-circle-check" />
             </div>
-            <h1 className="text-2xl font-bold text-ink-900">Email verified</h1>
+            <h1 className="font-display text-2xl font-bold text-ink-900">Email verified</h1>
             <p className="text-sm text-ink-600">{message}</p>
             <Link to="/login" className="btn btn-primary w-full inline-block">
               Go to login
@@ -73,7 +73,7 @@ export default function VerifyEmailPage() {
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-red-100 text-3xl">
               <i className="fa-solid fa-circle-xmark" />
             </div>
-            <h1 className="text-2xl font-bold text-ink-900">Verification failed</h1>
+            <h1 className="font-display text-2xl font-bold text-ink-900">Verification failed</h1>
             <p className="text-sm text-ink-600">{message}</p>
             <p className="text-xs text-ink-500">
               You can request a new verification email from the login page.

@@ -2,7 +2,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { APIError, b2bApi } from '@/lib/api';
-import { BORDER, DANGER } from '@/theme';
+import { DANGER } from '@/theme';
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -67,13 +67,13 @@ export default function B2BNewBatchPage() {
 
         <header className="max-w-3xl space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Organization workspace</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Create a New Batch</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Create a New Batch</h1>
           <p className="text-ink-600">Set up a role, upload resumes, and let TalentScope surface the strongest signals.</p>
         </header>
 
         <form onSubmit={submitBatch} noValidate className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
-            <section aria-labelledby="job-details-heading" className="rounded-2xl border bg-white p-6 shadow-card sm:p-8" style={{ borderColor: BORDER }}>
+            <section aria-labelledby="job-details-heading" className="rounded-2xl border border-ink-100 bg-white/80 p-6 shadow-soft-md backdrop-blur-sm sm:p-8">
               <div className="flex items-center gap-3 border-b border-ink-100 pb-5">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink-100 text-xs font-bold text-ink-600">01</span>
                 <div>
@@ -105,7 +105,7 @@ export default function B2BNewBatchPage() {
               </div>
             </section>
 
-            <section aria-labelledby="resume-upload-heading" className="rounded-2xl border bg-white p-6 shadow-card sm:p-8" style={{ borderColor: BORDER }}>
+            <section aria-labelledby="resume-upload-heading" className="rounded-2xl border border-ink-100 bg-white/80 p-6 shadow-soft-md backdrop-blur-sm sm:p-8">
               <div className="flex items-center gap-3 border-b border-ink-100 pb-5">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-xs font-bold text-brand-600">02</span>
                 <div>
@@ -165,7 +165,7 @@ export default function B2BNewBatchPage() {
           </div>
 
           {files.length > 0 && (
-            <section aria-label="Batch summary" className="rounded-2xl border bg-white p-5 shadow-card sm:px-6" style={{ borderColor: BORDER }}>
+            <section aria-label="Batch summary" className="rounded-2xl border border-ink-100 bg-white/80 p-5 shadow-soft-md backdrop-blur-sm sm:px-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">03 · Summary</p>
@@ -180,7 +180,7 @@ export default function B2BNewBatchPage() {
             <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm" style={{ color: DANGER }}>{createError}</div>
           )}
 
-          <div className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-6" style={{ borderColor: BORDER }}>
+          <div className="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white/80 p-5 shadow-soft-md backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p className="text-xs text-ink-500">You can add up to {MAX_BATCH_SIZE} files.</p>
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Link to="/b2b/batches" className="btn btn-ghost">Cancel</Link>

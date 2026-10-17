@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, APIError } from '@/lib/api';
-import { BORDER, DANGER, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
+import { BORDER, TEXT_MUTED, levelColor, scoreLevel } from '@/theme';
 
 type Candidate = {
   id: string;
@@ -66,11 +66,11 @@ export default function B2BComparePage() {
   }
 
   if (loadState === 'error') {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Unable to load comparison</h1></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Unable to load comparison</h1></div></B2BShell>;
   }
 
   if (notFound) {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Batch not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Batch not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
   }
 
   return (
@@ -79,7 +79,7 @@ export default function B2BComparePage() {
         <div className="flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Candidate review</p>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900">Compare candidates</h1>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Compare candidates</h1>
             <p className="text-ink-600">Review candidates side by side.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -90,7 +90,7 @@ export default function B2BComparePage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-ink-100 bg-white/80 p-4 shadow-soft-md backdrop-blur-sm">
           <p className="text-sm text-ink-600">Compare top candidates side by side.</p>
           <select value={limit} onChange={(e) => setLimit(e.target.value)} className="input w-44">
             <option value="3">3 candidates</option>
@@ -100,7 +100,7 @@ export default function B2BComparePage() {
         </div>
 
         {candidates.length === 0 ? (
-          <div className="rounded-2xl border bg-white py-16 text-center" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white py-16 text-center shadow-soft-md">
             <h3 className="text-base font-semibold text-ink-900">No candidates to compare</h3>
             <p className="mt-1 text-sm text-ink-500">Results appear once this batch has scored resumes.</p>
           </div>
@@ -114,7 +114,7 @@ export default function B2BComparePage() {
               const email = c.candidate_email ?? c.email;
               const phone = c.candidate_phone ?? c.phone;
               return (
-                <div key={c.id} className="rounded-[24px] border bg-white p-6 space-y-4 card-interactive hover-lift animate-scale-in" style={{ borderColor: BORDER }}>
+                <div key={c.id} className="space-y-4 rounded-3xl border border-ink-100 bg-white p-6 shadow-soft-md card-interactive hover-lift animate-scale-in">
                   <div className="flex items-start justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-brand-600">#{idx + 1}</span>
                     <span className="text-3xl font-bold tabular-nums animate-pulse-soft" style={{ color: hasScore ? levelColor(level) : TEXT_MUTED }}>
@@ -142,7 +142,7 @@ export default function B2BComparePage() {
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: TEXT_MUTED }}>Missing keywords</p>
                       <div className="flex flex-wrap gap-1.5">
                         {c.missing_keywords.slice(0, 8).map((k) => (
-                          <span key={k} className="px-2 py-1 rounded-lg text-[11px] font-medium" style={{ background: '#FEF2F2', color: DANGER }}>{k}</span>
+                          <span key={k} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700">{k}</span>
                         ))}
                       </div>
                     </div>

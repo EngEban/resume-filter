@@ -1,7 +1,7 @@
 import { useRef, useState, type ChangeEvent, type DragEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { b2cApi, APIError, type AnalysisResponse } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED, levelColor } from '@/theme';
+import { DANGER, SUCCESS, TEXT_MUTED, levelColor } from '@/theme';
 
 const MAX_MB = 10;
 const MAX_BYTES = MAX_MB * 1024 * 1024;
@@ -81,7 +81,7 @@ export default function AnalyzeResumePage() {
       {/* Header */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">B2C Workspace</p>
-        <h1 className="text-4xl font-bold tracking-tight text-ink-900">Analyze Resume</h1>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Analyze Resume</h1>
         <p className="text-ink-600">Upload a resume and get an AI-powered analysis in seconds.</p>
       </div>
 
@@ -90,11 +90,11 @@ export default function AnalyzeResumePage() {
         {/* Left: Form */}
         <form onSubmit={submit} className="space-y-6" noValidate>
           {/* Upload card */}
-          <section className="rounded-[24px] border bg-white p-6 shadow-card lg:p-8" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white/80 p-6 shadow-soft-md backdrop-blur-sm lg:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Step 1</p>
-                <h2 className="mt-2 text-xl font-bold text-ink-900">Upload your resume</h2>
+                <h2 className="mt-2 font-display text-xl font-bold text-ink-900">Upload your resume</h2>
               </div>
               <span className="badge badge-info">PDF / DOCX</span>
             </div>
@@ -111,17 +111,10 @@ export default function AnalyzeResumePage() {
                 onDrop={onDrop}
                 role="button"
                 tabIndex={0}
-                className="mt-6 flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200"
-                style={{
-                  borderColor: drag ? PRIMARY : BORDER,
-                  background: drag ? '#EFF6FF' : '#F8FAFC',
-                  transform: drag ? 'scale(1.02)' : 'scale(1)',
-                  boxShadow: drag ? '0 20px 40px -12px rgba(79, 70, 229, 0.25)' : 'none',
-                }}
+                className={`mt-6 flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200 ${drag ? 'scale-[1.02] border-brand-500 bg-brand-50 shadow-soft-lg' : 'border-ink-200 bg-ink-50/50'}`}
               >
                 <div
-                  className="h-14 w-14 rounded-2xl grid place-items-center text-2xl mb-4 transition-all animate-pulse-soft"
-                  style={{ background: drag ? '#DBEAFE' : '#E0E7FF', color: PRIMARY }}
+                  className={`mb-4 grid h-14 w-14 place-items-center rounded-2xl text-2xl text-brand-600 transition-all animate-pulse-soft ${drag ? 'bg-brand-100' : 'bg-brand-50'}`}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -138,7 +131,7 @@ export default function AnalyzeResumePage() {
                 </p>
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border bg-gradient-to-br from-emerald-50 to-white p-5 animate-fade-in" style={{ borderColor: '#A7F3D0' }}>
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-soft-sm animate-fade-in">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="h-12 w-12 rounded-xl bg-emerald-100 grid place-items-center text-sm font-bold text-emerald-700">
@@ -164,10 +157,10 @@ export default function AnalyzeResumePage() {
           </section>
 
           {/* Job description card */}
-          <section className="rounded-[24px] border bg-white p-6 shadow-card lg:p-8" style={{ borderColor: BORDER }}>
+          <section className="rounded-2xl border border-ink-100 bg-white/80 p-6 shadow-soft-md backdrop-blur-sm lg:p-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Step 2</p>
-              <h2 className="mt-2 text-xl font-bold text-ink-900">Job Description</h2>
+              <h2 className="mt-2 font-display text-xl font-bold text-ink-900">Job Description</h2>
             </div>
 
             <div className="mt-5 space-y-2">
@@ -192,7 +185,7 @@ export default function AnalyzeResumePage() {
           </section>
 
           {/* Action bar */}
-          <div className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: BORDER }}>
+          <div className="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white/80 p-5 shadow-soft-md backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm" style={{ color: status === 'error' ? DANGER : status === 'success' ? SUCCESS : TEXT_MUTED }}>
               {message || (file && jobDescription.trim().length >= 20 ? <><i className="fa-solid fa-circle-check" />{' '}Ready to analyze.</> : 'Add a resume and a job description.')}
             </p>
@@ -221,10 +214,10 @@ export default function AnalyzeResumePage() {
         {/* Right: Tips + Result */}
         <div className="space-y-6">
           {/* Tips card */}
-          <div className="rounded-2xl border bg-gradient-to-br from-brand-50 to-white p-6 shadow-card" style={{ borderColor: '#C7D2FE' }}>
+          <div className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-6 shadow-soft-md">
             <div className="flex items-center gap-2">
               <span className="text-xl"><i className="fa-solid fa-lightbulb" /></span>
-              <h3 className="text-base font-bold text-ink-900">Tips for better results</h3>
+              <h3 className="font-display text-base font-bold text-ink-900">Tips for better results</h3>
             </div>
             <ul className="mt-5 space-y-4 stagger">
               {TIPS.map((tip) => (
@@ -241,7 +234,7 @@ export default function AnalyzeResumePage() {
 
           {/* Loading state */}
           {analyzing && (
-            <div className="rounded-2xl border bg-white p-6 shadow-card animate-fade-in" style={{ borderColor: '#C7D2FE' }}>
+            <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-soft-md animate-fade-in">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-brand-50 grid place-items-center">
                   <span className="h-5 w-5 rounded-full border-2 border-brand-200 border-t-brand-600 animate-spin" />
@@ -261,11 +254,11 @@ export default function AnalyzeResumePage() {
 
           {/* Result */}
           {status === 'success' && result && (
-            <div className="signal-ring rounded-[24px] border bg-white p-6 shadow-card animate-fade-in-up" style={{ borderColor: '#A7F3D0' }}>
+            <div className="signal-ring rounded-2xl border border-emerald-200 bg-white p-6 shadow-soft-md animate-fade-in-up">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Result ready</p>
-                  <h3 className="mt-1 text-lg font-bold text-ink-900">ATS Score</h3>
+                  <h3 className="mt-1 font-display text-lg font-bold text-ink-900">ATS Score</h3>
                 </div>
                 <div className="text-right">
                   <p className="text-4xl font-bold tabular-nums" style={{ color: levelColor(result.level) }}>
@@ -292,7 +285,7 @@ export default function AnalyzeResumePage() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: BORDER }}>
+              <div className="mt-4 border-t border-ink-100 pt-4">
                 <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: TEXT_MUTED }}>
                   Score breakdown
                 </p>
@@ -307,8 +300,8 @@ export default function AnalyzeResumePage() {
                         </div>
                         <div className="mt-1 h-1.5 rounded-full bg-ink-100 overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{ width: `${pct}%`, background: PRIMARY }}
+                            className="h-full rounded-full gradient-primary transition-all duration-700"
+                            style={{ width: `${pct}%` }}
                           />
                         </div>
                       </div>

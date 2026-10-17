@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, APIError, type BatchAnalytics, type Batch } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED, WARNING } from '@/theme';
+import { DANGER, LEVEL_COLORS, PRIMARY, SUCCESS, TEXT_MUTED, TEXT_PRIMARY, WARNING } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type ExportType = 'xlsx';
@@ -72,11 +72,11 @@ export default function B2BAnalyticsPage() {
   }
 
   if (loadState === 'error') {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Unable to load analytics</h1><button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-6">Try Again</button></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Unable to load analytics</h1><button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-6">Try Again</button></div></B2BShell>;
   }
 
   if (notFound || !batch || !analytics) {
-    return <B2BShell><div className="py-24 text-center"><h1 className="text-2xl font-bold text-ink-900">Batch not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
+    return <B2BShell><div className="page-enter py-24 text-center"><h1 className="font-display text-2xl font-bold text-ink-900">Batch not found</h1><Link to="/b2b/batches" className="btn btn-primary mt-6 inline-flex">Back to Batches</Link></div></B2BShell>;
   }
 
   return (
@@ -93,7 +93,7 @@ export default function B2BAnalyticsPage() {
         <div className="flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Batch Intelligence</p>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900">Analytics</h1>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Analytics</h1>
             <p className="text-ink-600">Understand the results and performance of this resume batch.</p>
             <p className="text-sm" style={{ color: TEXT_MUTED }}>{batch.job_title} · {formatDate(batch.created_at)}</p>
           </div>
@@ -121,7 +121,7 @@ export default function B2BAnalyticsPage() {
         </div>
 
         {!hasData && (
-          <div className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Quality signal</p>
             <h2 className="mt-2 text-xl font-bold text-ink-900">Analytics not available yet</h2>
             <p className="mt-2 text-sm text-ink-500">Analytics will appear once resume analyses complete.</p>
@@ -129,13 +129,13 @@ export default function B2BAnalyticsPage() {
           </div>
         )}
 
-        <section className="rounded-[24px] border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+        <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
           <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Pattern signals</p>
           <h2 className="mt-2 text-xl font-bold text-ink-900">Top missing keywords</h2>
           {analytics.top_missing_keywords.length > 0 ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {analytics.top_missing_keywords.slice(0, 9).map((k) => (
-                <div key={k.keyword} className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 hover-scale" style={{ borderColor: BORDER }}>
+                <div key={k.keyword} className="flex items-center justify-between gap-3 rounded-xl border border-ink-100 px-3 py-2.5 hover-scale">
                   <span className="truncate text-sm text-ink-700">{k.keyword}</span>
                   <span className="shrink-0 text-xs font-bold text-brand-600 tabular-nums">{k.count}</span>
                 </div>
@@ -152,9 +152,9 @@ export default function B2BAnalyticsPage() {
 
 function Metric({ label, value, color }: { label: string; value: number | string; color?: string }) {
   return (
-    <div className="rounded-[20px] border bg-white p-4 hover-lift" style={{ borderColor: BORDER }}>
-      <p className="text-xs font-medium" style={{ color: TEXT_MUTED }}>{label}</p>
-      <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums" style={{ color: color ?? '#0F172A' }}>{value}</p>
+    <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-soft-md hover-lift">
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight tabular-nums" style={{ color: color ?? TEXT_PRIMARY }}>{value}</p>
     </div>
   );
 }
@@ -163,11 +163,11 @@ function ProcessingOverview({ analytics }: { analytics: BatchAnalytics }) {
   const total = analytics.total_resumes || 1;
   const segments = [
     { label: 'Completed', value: analytics.completed, color: PRIMARY },
-    { label: 'Pending', value: analytics.pending, color: '#94A3B8' },
+    { label: 'Pending', value: analytics.pending, color: TEXT_MUTED },
     { label: 'Failed', value: analytics.failed, color: DANGER },
   ];
   return (
-    <div className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+    <div className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
       <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Operational view</p>
       <h2 className="mt-2 text-xl font-bold text-ink-900">Processing overview</h2>
       <div className="mt-6 flex h-3 overflow-hidden rounded-full bg-ink-100">
@@ -192,14 +192,14 @@ function ProcessingOverview({ analytics }: { analytics: BatchAnalytics }) {
 
 function DistributionCard({ distribution, total }: { distribution: BatchAnalytics['score_distribution'] | null; total: number }) {
   const rows: Array<{ key: keyof NonNullable<BatchAnalytics['score_distribution']>; label: string; color: string }> = [
-    { key: 'excellent', label: 'Excellent (90-100)', color: '#15803D' },
-    { key: 'good', label: 'Good (75-89)', color: '#16A34A' },
-    { key: 'average', label: 'Average (60-74)', color: '#F59E0B' },
-    { key: 'below_average', label: 'Below avg (40-59)', color: '#EA580C' },
-    { key: 'weak', label: 'Weak (0-39)', color: '#DC2626' },
+    { key: 'excellent', label: 'Excellent (90-100)', color: LEVEL_COLORS.excellent ?? TEXT_MUTED },
+    { key: 'good', label: 'Good (75-89)', color: LEVEL_COLORS.good ?? TEXT_MUTED },
+    { key: 'average', label: 'Average (60-74)', color: LEVEL_COLORS.average ?? TEXT_MUTED },
+    { key: 'below_average', label: 'Below avg (40-59)', color: LEVEL_COLORS.below_average ?? TEXT_MUTED },
+    { key: 'weak', label: 'Weak (0-39)', color: LEVEL_COLORS.weak ?? TEXT_MUTED },
   ];
   return (
-    <div className="rounded-2xl border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+    <div className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
       <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Quality signal</p>
       <h2 className="mt-2 text-xl font-bold text-ink-900">Score distribution</h2>
       {distribution && total > 0 ? (

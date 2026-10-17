@@ -391,3 +391,61 @@ async def reprocess_batch(
         batch_id,
     )
     return BatchRead.model_validate(batch)
+# ============================================================
+# Delete a single batch (DB + storage files)
+# ============================================================
+@router.delete("/{batch_id}", status_code=status.HTTP_200_OK)
+async def delete_batch(
+    batch_id: uuid.UUID,
+    user: Annotated[User, Depends(require_batch_operator)],
+    db: Annotated[AsyncSession, Depends(get_tenant_db)],
+) -> dict:
+    """Delete a batch and all its resumes."""
+    batch = await get_tenant_batch(db, user.tenant_id, batch_id)
+    storage_paths = (
+        (await db.execute(select(Resume.storage_path).where(Resume.batch_id == batch_id, Resume.tenant_id == user.tenant_id)))
+        .scalars()
+        .all()
+    )
+    resume_count = len(storage_paths)
+
+    for path in storage_paths:
+        try:
+            delete_file(path)
+        except Exception as exc:
+            logger.warning("Failed to delete storage file %s: %s", path, exc)
+
+    await db.delete(batch)
+    await db.commit()
+
+    return {"message": "Batch deleted.", "id": str(batch_id), "deleted_resumes": resume_count}
+
+# ============================================================
+# Delete all batches for the tenant
+# ============================================================
+@router.delete("", status_code=status.HTTP_200_OK)
+async def clear_all_batches(
+    user: Annotated[User, Depends(require_batch_operator)],
+    db: Annotated[AsyncSession, Depends(get_tenant_db)],
+) -> dict:
+    """Delete ALL batches for the current tenant."""
+    storage_paths = (
+        (await db.execute(select(Resume.storage_path).where(Resume.tenant_id == user.tenant_id)))
+        .scalars()
+        .all()
+    )
+    batch_count_result = await db.execute(select(func.count(Batch.id)).where(Batch.tenant_id == user.tenant_id))
+    batch_count = batch_count_result.scalar_one() or 0
+    resume_count = len(storage_paths)
+
+    for path in storage_paths:
+        try:
+            delete_file(path)
+        except Exception as exc:
+            logger.warning("Failed to delete storage file %s: %s", path, exc)
+
+    from sqlalchemy import delete as sa_delete
+    await db.execute(sa_delete(Batch).where(Batch.tenant_id == user.tenant_id))
+    await db.commit()
+
+    return {"message": "All batches cleared.", "deleted_batches": batch_count, "deleted_resumes": resume_count}

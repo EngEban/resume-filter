@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import B2BShell from '../components/B2BShell';
 import { b2bApi, type TenantOverview } from '@/lib/api';
-import { BORDER, DANGER, PRIMARY, SUCCESS, TEXT_MUTED, WARNING } from '@/theme';
+import { DANGER, LEVEL_COLORS, PRIMARY, SUCCESS, TEXT_MUTED, TEXT_PRIMARY, WARNING } from '@/theme';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -38,7 +38,7 @@ export default function B2BAnalyticsOverviewPage() {
       <div className="space-y-8 page-enter">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Organization insights</p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Analytics Overview</h1>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">Analytics Overview</h1>
           <p className="text-ink-600">Company-wide hiring insights across all batches.</p>
         </div>
 
@@ -49,7 +49,7 @@ export default function B2BAnalyticsOverviewPage() {
         )}
 
         {loadState === 'error' && (
-          <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
+          <div className="rounded-2xl border border-ink-100 bg-white p-8 text-center shadow-soft-md">
             <p className="text-sm" style={{ color: DANGER }}>Unable to load analytics.</p>
             <button type="button" onClick={() => setRefreshKey((v) => v + 1)} className="btn btn-primary mt-4">
               Try Again
@@ -89,16 +89,16 @@ export default function B2BAnalyticsOverviewPage() {
             </div>
 
             {distTotal > 0 && (
-                <section className="rounded-[24px] border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+                <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Quality signal</p>
                 <h2 className="mt-1 text-xl font-bold text-ink-900">Score distribution (all time)</h2>
                 <div className="mt-6 space-y-4">
                   {[
-                    { key: 'excellent' as const, label: 'Excellent (90-100)', color: '#15803D' },
-                    { key: 'good' as const, label: 'Good (75-89)', color: '#16A34A' },
-                    { key: 'average' as const, label: 'Average (60-74)', color: '#F59E0B' },
-                    { key: 'below_average' as const, label: 'Below avg (40-59)', color: '#EA580C' },
-                    { key: 'weak' as const, label: 'Weak (0-39)', color: '#DC2626' },
+                    { key: 'excellent' as const, label: 'Excellent (90-100)', color: LEVEL_COLORS.excellent },
+                    { key: 'good' as const, label: 'Good (75-89)', color: LEVEL_COLORS.good },
+                    { key: 'average' as const, label: 'Average (60-74)', color: LEVEL_COLORS.average },
+                    { key: 'below_average' as const, label: 'Below avg (40-59)', color: LEVEL_COLORS.below_average },
+                    { key: 'weak' as const, label: 'Weak (0-39)', color: LEVEL_COLORS.weak },
                   ].map((row) => {
                     const count = overview.score_distribution[row.key] ?? 0;
                     const pct = Math.round((count / distTotal) * 100);
@@ -119,12 +119,12 @@ export default function B2BAnalyticsOverviewPage() {
             )}
 
             {overview.top_missing_keywords.length > 0 && (
-              <section className="rounded-[24px] border bg-white p-6 hover-lift" style={{ borderColor: BORDER }}>
+              <section className="rounded-2xl border border-ink-100 bg-white p-6 shadow-soft-md hover-lift">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Pattern signals</p>
                 <h2 className="mt-1 text-xl font-bold text-ink-900">Top missing keywords</h2>
                 <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {overview.top_missing_keywords.slice(0, 12).map((k) => (
-                    <div key={k.keyword} className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5" style={{ borderColor: BORDER }}>
+                    <div key={k.keyword} className="flex items-center justify-between gap-3 rounded-xl border border-ink-100 px-3 py-2.5">
                       <span className="truncate text-sm text-ink-700">{k.keyword}</span>
                       <span className="shrink-0 text-xs font-bold text-brand-600 tabular-nums">{k.count}</span>
                     </div>
@@ -142,8 +142,8 @@ export default function B2BAnalyticsOverviewPage() {
                   </div>
                   <Link to="/b2b/batches" className="text-sm font-medium text-brand-600 hover:text-brand-700">View all <i className="fa-solid fa-arrow-right" /></Link>
                 </div>
-                <div className="overflow-hidden rounded-[24px] border bg-white shadow-card" style={{ borderColor: BORDER }}>
-                  <div className="divide-y" style={{ borderColor: BORDER }}>
+                <div className="overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft-lg">
+                  <div className="divide-y divide-ink-100">
                     {overview.recent_batches.slice(0, 5).map((b) => (
                       <Link key={b.id} to={`/b2b/batches/${b.id}`} className="block px-6 py-4 hover:bg-brand-50/40 transition-colors">
                         <div className="flex items-center justify-between gap-4">
@@ -168,9 +168,9 @@ export default function B2BAnalyticsOverviewPage() {
 
 function Stat({ label, value, color }: { label: string; value: number | string; color?: string }) {
   return (
-    <div className="rounded-2xl border bg-white p-5 hover-lift" style={{ borderColor: BORDER }}>
-      <p className="text-xs font-medium" style={{ color: TEXT_MUTED }}>{label}</p>
-      <p className="mt-3 text-3xl font-bold tracking-tight tabular-nums" style={{ color: color ?? '#0F172A' }}>{value}</p>
+    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft-md transition-all hover:-translate-y-1">
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="mt-3 font-display text-3xl font-bold tracking-tight tabular-nums" style={{ color: color ?? TEXT_PRIMARY }}>{value}</p>
     </div>
   );
 }

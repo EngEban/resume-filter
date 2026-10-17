@@ -80,7 +80,7 @@ export default function RegisterPage() {
   if (registeredEmail) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ink-50 p-6 page-enter">
-        <div className="w-full max-w-md space-y-6 rounded-2xl border border-ink-200 bg-white p-8 shadow-card">
+        <div className="w-full max-w-md space-y-6 rounded-3xl border border-ink-100 bg-white/95 p-8 shadow-soft-xl backdrop-blur-sm">
           <div className="flex justify-center">
             <Logo size="md" to="/" />
           </div>
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             <i className="fa-solid fa-envelope-open-text" />
           </div>
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-ink-900">Check your email</h1>
+            <h1 className="font-display text-2xl font-bold text-ink-900">Check your email</h1>
             <p className="text-sm text-ink-600">
               We sent a verification link to <strong>{registeredEmail}</strong>.
               Click it to activate your account.
@@ -109,7 +109,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-ink-50 page-enter">
       {/* ==================== LEFT: Illustration ==================== */}
-      <aside className="relative hidden overflow-hidden bg-ink-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+      <aside className="relative hidden overflow-hidden gradient-hero p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div aria-hidden className="absolute inset-0 opacity-70 [background-image:linear-gradient(rgba(129,140,248,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(129,140,248,0.12)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
         <div aria-hidden className="absolute -left-32 bottom-1/4 h-96 w-96 rounded-full bg-brand-600/30 blur-3xl animate-pulse-soft" />
         <div aria-hidden className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-white/5 blur-3xl animate-float-slow" />
@@ -123,7 +123,7 @@ export default function RegisterPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
             Resume Intelligence
           </p>
-          <h1 className="text-5xl font-bold leading-[1.02] tracking-[-0.04em] text-white">
+          <h1 className="font-display text-5xl font-bold leading-[1.02] tracking-[-0.04em] text-white">
             Build your hiring edge.
           </h1>
           <p className="text-base leading-7 text-white/80">
@@ -141,7 +141,7 @@ export default function RegisterPage() {
 
       {/* ==================== RIGHT: Form ==================== */}
       <main className="flex items-center justify-center p-6 sm:p-10 lg:p-12">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-8 rounded-3xl border border-ink-100 bg-white/95 p-6 shadow-soft-xl backdrop-blur-sm sm:p-10">
           <div className="lg:hidden">
             <Logo size="md" to="/" />
           </div>
@@ -150,7 +150,7 @@ export default function RegisterPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
               Start with Talentscope
             </p>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900">
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink-900">
               Create your account
             </h1>
             <p className="text-base text-ink-600">
