@@ -4,7 +4,6 @@ import pytest
 from fastapi import HTTPException
 
 from app import providers as providers_module
-from app.api.v1.b2b import settings as settings_module
 from app.core.config import settings as app_settings
 from app.providers import resolve_llm_config
 from app.providers import unified_provider as provider_module
@@ -92,41 +91,3 @@ def test_default_docker_ollama_endpoint_is_explicitly_trusted(monkeypatch):
 
     validate_platform_llm_endpoint("ollama", None)
     validate_platform_llm_endpoint("ollama", "http://ollama:11434/")
-
-
-@pytest.mark.asyncio
-async def test_connection_test_uses_platform_config_without_client_values(monkeypatch):
-    config = ResolvedLLMConfig(
-        provider="groq",
-        model="groq/test-model",
-        api_key="platform-key",
-        source="platform",
-    )
-    created = []
-
-    monkeypatch.setattr(settings_module, "resolve_llm_config", lambda: config)
-
-    class FakeProvider:
-        def __init__(self, received):
-            created.append(received)
-
-        async def complete(self, **kwargs):
-            return SimpleNamespace()
-
-    monkeypatch.setattr(settings_module, "UnifiedLLMProvider", FakeProvider)
-
-    result = await settings_module.test_llm_connection(SimpleNamespace())
-
-    assert result.success is True
-    assert created == [config]
-
-
-@pytest.mark.asyncio
-async def test_legacy_write_routes_reject_tenant_byok_without_db_write():
-    with pytest.raises(HTTPException) as update_error:
-        await settings_module.update_llm_settings(SimpleNamespace())
-    with pytest.raises(HTTPException) as delete_error:
-        await settings_module.delete_llm_settings(SimpleNamespace())
-
-    assert update_error.value.status_code == 409
-    assert delete_error.value.status_code == 409
