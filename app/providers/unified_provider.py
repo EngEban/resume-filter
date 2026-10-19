@@ -25,6 +25,7 @@ litellm.drop_params = True
 @dataclass
 class ResolvedLLMConfig:
     """Resolved LLM configuration for a single request."""
+
     provider: str
     model: str
     api_key: str
@@ -119,7 +120,9 @@ def validate_platform_llm_endpoint(provider: str, base_url: str | None) -> None:
 
     allowed_hosts = _PLATFORM_HOSTS.get(provider, set())
     allowed_suffixes = _PLATFORM_HOST_SUFFIXES.get(provider, ())
-    if hostname not in allowed_hosts and not any(hostname.endswith(suffix) for suffix in allowed_suffixes):
+    if hostname not in allowed_hosts and not any(
+        hostname.endswith(suffix) for suffix in allowed_suffixes
+    ):
         raise ValueError("Platform LLM endpoint must use an official provider host")
 
     _resolve_public_host(hostname, port or 443)
@@ -168,7 +171,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
         json_mode: bool = False,
         temperature: float = 0.2,
         max_tokens: int = 4096,
-         ) -> LLMResponse:
+    ) -> LLMResponse:
         """Call the configured LLM via LiteLLM."""
         kwargs: dict = {
             "model": self.config.model,

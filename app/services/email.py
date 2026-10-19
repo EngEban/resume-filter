@@ -27,10 +27,8 @@ async def send_verification_email(
         logger.warning("RESEND_API_KEY not set - skipping email to %s", to_email)
         return False
 
-    verify_url = (
-        f"{settings.APP_BASE_URL}/verify-email?token={verification_token}"
-    )
-    
+    verify_url = f"{settings.APP_BASE_URL}/verify-email?token={verification_token}"
+
     html = f"""
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px;">
       <h2 style="color: #4F46E5;">Welcome to Talentscope</h2>
@@ -53,12 +51,14 @@ async def send_verification_email(
     """
 
     try:
-        await resend.Emails.send_async({
-            "from": f"{settings.EMAIL_FROM_NAME} <{settings.EMAIL_FROM}>",
-            "to": [to_email],
-            "subject": "Verify your Talentscope account",
-            "html": html,
-        })
+        await resend.Emails.send_async(
+            {
+                "from": f"{settings.EMAIL_FROM_NAME} <{settings.EMAIL_FROM}>",
+                "to": [to_email],
+                "subject": "Verify your Talentscope account",
+                "html": html,
+            }
+        )
         logger.info("Verification email sent to %s", to_email)
         return True
     except Exception as exc:

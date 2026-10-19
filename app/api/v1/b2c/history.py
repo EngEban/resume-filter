@@ -104,9 +104,7 @@ async def clear_history(
     deleted_count = count_result.scalar_one() or 0
 
     # Delete
-    await db.execute(
-        delete(Analysis).where(Analysis.user_id == user.id)
-    )
+    await db.execute(delete(Analysis).where(Analysis.user_id == user.id))
     await db.commit()
 
     return {

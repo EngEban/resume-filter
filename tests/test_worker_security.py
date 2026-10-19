@@ -31,9 +31,7 @@ class FakeWorkerSession:
         }.get(model)
 
     def execute(self, _statement):
-        return SimpleNamespace(
-            scalars=lambda: SimpleNamespace(one_or_none=lambda: self.resume)
-        )
+        return SimpleNamespace(scalars=lambda: SimpleNamespace(one_or_none=lambda: self.resume))
 
     def commit(self):
         return None

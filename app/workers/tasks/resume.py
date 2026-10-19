@@ -53,9 +53,7 @@ def _load_verified_resume(
 
     if lock:
         resume = (
-            session.execute(
-                select(Resume).where(Resume.id == resume_uuid).with_for_update()
-            )
+            session.execute(select(Resume).where(Resume.id == resume_uuid).with_for_update())
             .scalars()
             .one_or_none()
         )
@@ -281,6 +279,4 @@ def process_resume(
             }
 
         # Retry with exponential backoff
-        raise self.retry(
-            exc=exc, countdown=30 * (self.request.retries + 1)
-        ) from exc
+        raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1)) from exc

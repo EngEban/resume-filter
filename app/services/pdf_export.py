@@ -253,7 +253,7 @@ def build_resume_pdf(report: dict) -> bytes:
     story.append(Paragraph(report.get("candidate_name") or "Unknown Candidate", s["title"]))
     story.append(
         Paragraph(
-            f'<font color="{color.hexval()}"><b>' f"{score:.1f} — {LEVEL_LABELS[level]}</b></font>"
+            f'<font color="{color.hexval()}"><b>{score:.1f} — {LEVEL_LABELS[level]}</b></font>'
             if score is not None
             else "No score available.",
             s["body"],

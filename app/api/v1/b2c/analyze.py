@@ -66,7 +66,7 @@ async def analyze_resume(
     if len(content) > max_bytes:
         raise HTTPException(
             status_code=413,
-            detail=(f"File exceeds the maximum size of " f"{settings.B2C_MAX_FILE_SIZE_MB} MB."),
+            detail=(f"File exceeds the maximum size of {settings.B2C_MAX_FILE_SIZE_MB} MB."),
         )
 
     # ---------- 3. Extract text ----------

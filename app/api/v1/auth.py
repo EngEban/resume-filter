@@ -174,9 +174,7 @@ async def verify_email(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     """Verify an email address using the token from the email link."""
-    result = await db.execute(
-        select(User).where(User.verification_token == token)
-    )
+    result = await db.execute(select(User).where(User.verification_token == token))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -286,4 +284,3 @@ async def read_me(
         tenant_id=user.tenant_id,
         display_name=display_name,
     )
-

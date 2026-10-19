@@ -11,9 +11,9 @@ from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.models.batch import Batch
 from app.workers.celery_app import celery_app
 from app.workers.tasks.resume import process_resume, validate_storage_path
-from app.db.models.batch import Batch  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -120,13 +120,7 @@ def finalize_batch(results: list, batch_id: str, tenant_id: str | None = None) -
                 return {"batch_id": batch_id, "status": "not_found"}
             raise
 
-        resumes = (
-            session.execute(
-                select(Resume).where(Resume.batch_id == batch.id)
-            )
-            .scalars()
-            .all()
-        )
+        resumes = session.execute(select(Resume).where(Resume.batch_id == batch.id)).scalars().all()
         if any(resume.tenant_id != batch.tenant_id for resume in resumes):
             raise ValueError("Batch contains a resume from another tenant")
         statuses = [resume.status for resume in resumes]

@@ -24,7 +24,6 @@ def test_resolve_llm_config_always_uses_platform_settings(monkeypatch):
     monkeypatch.setattr(app_settings, "PLATFORM_LLM_BASE_URL", None)
 
     tenant = SimpleNamespace()
-
     config = resolve_llm_config(tenant)
 
     assert config.provider == "groq"
@@ -57,7 +56,6 @@ def test_official_platform_endpoint_is_allowed_without_real_request(monkeypatch)
         return _public_dns(hostname, port, **kwargs)
 
     monkeypatch.setattr(provider_module.socket, "getaddrinfo", resolver)
-
     validate_platform_llm_endpoint("openai", "https://api.openai.com/v1")
 
     assert calls == [("api.openai.com", 443, {"type": provider_module.socket.SOCK_STREAM})]

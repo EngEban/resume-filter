@@ -259,7 +259,7 @@ async def export_batch_xlsx(
     filename = f"batch_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
-        media_type=("application/vnd.openxmlformats-officedocument." "spreadsheetml.sheet"),
+        media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
@@ -391,6 +391,8 @@ async def reprocess_batch(
         batch_id,
     )
     return BatchRead.model_validate(batch)
+
+
 # ============================================================
 # Delete a single batch (DB + storage files)
 # ============================================================
@@ -403,7 +405,13 @@ async def delete_batch(
     """Delete a batch and all its resumes."""
     batch = await get_tenant_batch(db, user.tenant_id, batch_id)
     storage_paths = (
-        (await db.execute(select(Resume.storage_path).where(Resume.batch_id == batch_id, Resume.tenant_id == user.tenant_id)))
+        (
+            await db.execute(
+                select(Resume.storage_path).where(
+                    Resume.batch_id == batch_id, Resume.tenant_id == user.tenant_id
+                )
+            )
+        )
         .scalars()
         .all()
     )
@@ -420,6 +428,7 @@ async def delete_batch(
 
     return {"message": "Batch deleted.", "id": str(batch_id), "deleted_resumes": resume_count}
 
+
 # ============================================================
 # Delete all batches for the tenant
 # ============================================================
@@ -434,7 +443,9 @@ async def clear_all_batches(
         .scalars()
         .all()
     )
-    batch_count_result = await db.execute(select(func.count(Batch.id)).where(Batch.tenant_id == user.tenant_id))
+    batch_count_result = await db.execute(
+        select(func.count(Batch.id)).where(Batch.tenant_id == user.tenant_id)
+    )
     batch_count = batch_count_result.scalar_one() or 0
     resume_count = len(storage_paths)
 
@@ -445,7 +456,12 @@ async def clear_all_batches(
             logger.warning("Failed to delete storage file %s: %s", path, exc)
 
     from sqlalchemy import delete as sa_delete
+
     await db.execute(sa_delete(Batch).where(Batch.tenant_id == user.tenant_id))
     await db.commit()
 
-    return {"message": "All batches cleared.", "deleted_batches": batch_count, "deleted_resumes": resume_count}
+    return {
+        "message": "All batches cleared.",
+        "deleted_batches": batch_count,
+        "deleted_resumes": resume_count,
+    }

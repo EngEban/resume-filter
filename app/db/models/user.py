@@ -43,18 +43,25 @@ class User(Base, UUIDMixin, TimestampMixin):
 
     # ---------- Email Verification ----------
     email_verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     verification_token: Mapped[str | None] = mapped_column(
-        String(500), nullable=True, index=True,
+        String(500),
+        nullable=True,
+        index=True,
     )
     verification_sent_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     # ---------- Google OAuth ----------
     google_id: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, unique=True, index=True,
+        String(100),
+        nullable=True,
+        unique=True,
+        index=True,
     )
 
     # ---------- Tenant (nullable for B2C) ----------

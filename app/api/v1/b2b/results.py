@@ -187,6 +187,6 @@ async def export_comparison_xlsx(
     filename = f"compare_{str(batch.id)[:8]}_{datetime.now(UTC):%Y%m%d}.xlsx"
     return Response(
         content=xlsx_bytes,
-        media_type=("application/vnd.openxmlformats-officedocument." "spreadsheetml.sheet"),
+        media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

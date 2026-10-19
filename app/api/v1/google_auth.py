@@ -53,9 +53,7 @@ async def google_callback(
 
     # Find existing user by google_id OR email
     result = await db.execute(
-        select(User).where(
-            (User.google_id == google_id) | (User.email == email)
-        )
+        select(User).where((User.google_id == google_id) | (User.email == email))
     )
     user = result.scalar_one_or_none()
 
@@ -90,6 +88,4 @@ async def google_callback(
     logger.info("google_login_success", email=email, is_new=user is not None)
 
     access_token = create_access_token(user)
-    return RedirectResponse(
-        url=f"{settings.APP_BASE_URL}/auth/callback?token={access_token}"
-    )
+    return RedirectResponse(url=f"{settings.APP_BASE_URL}/auth/callback?token={access_token}")

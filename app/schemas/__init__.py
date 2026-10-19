@@ -18,7 +18,11 @@ __all__ = [
     "AnalysisResponse",
     # Analytics
     "BatchAnalytics",
+    # Batch
+    "BatchCreate",
+    "BatchRead",
     "KeywordFrequency",
+    "ResumeRead",
     "ScoreDistribution",
     "TenantOverview",
     # Auth
@@ -26,8 +30,4 @@ __all__ = [
     "Token",
     "UserCreate",
     "UserRead",
-    # Batch
-    "BatchCreate",
-    "BatchRead",
-    "ResumeRead",
 ]
